@@ -13,33 +13,41 @@ function StepIndicator() {
   const { step, setStep } = useCVStore()
 
   return (
-    <div className="flex items-center">
-      {STEPS.map((s, i) => (
-        <div key={i} className="flex items-center">
-          <button
-            type="button"
-            onClick={() => setStep(i)}
-            title={s.short}
-            className="flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold transition-all"
-            style={{
-              background: i < step ? '#f0a0b8' : i === step ? '#e11d78' : 'rgba(255,255,255,0.7)',
-              color: i < step || i === step ? '#fff' : '#9ca3af',
-              border: i < step || i === step ? 'none' : '1px solid #e5e7eb',
-              boxShadow: i === step ? '0 0 0 3px rgba(225,29,120,0.2)' : 'none',
-            }}
-          >
-            {i < step ? '✓' : i + 1}
-          </button>
+    <>
+      {/* Mobile — text only */}
+      <div className="flex sm:hidden items-center gap-2">
+        <span className="text-xs font-semibold" style={{ color: '#e11d78' }}>{STEPS[step].short}</span>
+        <span className="text-xs text-gray-400">{step + 1}/{STEPS.length}</span>
+      </div>
 
-          {i < STEPS.length - 1 && (
-            <div
-              className="h-px w-5 mx-0.5 transition-all"
-              style={{ background: i < step ? '#f0a0b8' : '#e5e7eb' }}
-            />
-          )}
-        </div>
-      ))}
-    </div>
+      {/* Desktop — full step circles */}
+      <div className="hidden sm:flex items-center">
+        {STEPS.map((s, i) => (
+          <div key={i} className="flex items-center">
+            <button
+              type="button"
+              onClick={() => setStep(i)}
+              title={s.short}
+              className="flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold transition-all"
+              style={{
+                background: i < step ? '#f0a0b8' : i === step ? '#e11d78' : 'rgba(255,255,255,0.7)',
+                color: i < step || i === step ? '#fff' : '#9ca3af',
+                border: i < step || i === step ? 'none' : '1px solid #e5e7eb',
+                boxShadow: i === step ? '0 0 0 3px rgba(225,29,120,0.2)' : 'none',
+              }}
+            >
+              {i < step ? '✓' : i + 1}
+            </button>
+            {i < STEPS.length - 1 && (
+              <div
+                className="h-px w-5 mx-0.5 transition-all"
+                style={{ background: i < step ? '#f0a0b8' : '#e5e7eb' }}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+    </>
   )
 }
 
@@ -138,7 +146,7 @@ function UserMenu() {
   )
 }
 
-function NewCVButton() {
+function NewCVButton({ className = '' }: { className?: string }) {
   const reset = useCVStore((s) => s.reset)
   const router = useRouter()
 
@@ -151,7 +159,7 @@ function NewCVButton() {
     <button
       type="button"
       onClick={handleNewCV}
-      className="magenta-btn rounded-xl px-4 py-2 text-sm font-semibold transition"
+      className={`magenta-btn rounded-xl px-4 py-2 text-sm font-semibold transition ${className}`}
     >
       Nouveau CV
     </button>
@@ -181,12 +189,13 @@ export default function Header() {
       <div className="flex items-center gap-3">
         {pathname === '/create' && (
           <>
-            <NewCVButton />
+            <NewCVButton className="hidden sm:block" />
             <Link
               href="/preview"
-              className="indigo-btn rounded-xl px-4 py-2 text-sm font-semibold transition"
+              className="indigo-btn rounded-xl px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition"
             >
-              Prévisualiser →
+              <span className="sm:hidden">Aperçu →</span>
+              <span className="hidden sm:inline">Prévisualiser →</span>
             </Link>
           </>
         )}

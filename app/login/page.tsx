@@ -59,7 +59,7 @@ export default function LoginPage() {
       }}
     >
       <div className="w-full max-w-sm">
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/80 shadow-sm p-8">
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/80 shadow-sm p-6 sm:p-8">
           <div className="text-center mb-6">
             <Link href="/" className="text-base font-bold tracking-tight" style={{ color: '#4f46e5' }}>
               indigo cv

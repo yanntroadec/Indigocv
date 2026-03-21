@@ -27,7 +27,7 @@ export default async function DashboardPage() {
 
   return (
     <main
-      className="min-h-screen py-10 px-4 pt-28 pb-14"
+      className="min-h-screen py-6 px-4 pt-20 sm:pt-28 pb-14"
       style={{
         background: `
           repeating-linear-gradient(

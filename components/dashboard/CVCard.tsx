@@ -35,7 +35,7 @@ export default function CVCard({ id: _id, name, updatedAt, personal, onOpen, onD
   })
 
   return (
-    <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/80 shadow-sm p-5 flex items-start justify-between gap-4">
+    <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/80 shadow-sm p-4 sm:p-5 flex items-start justify-between gap-3 sm:gap-4">
       <div className="flex-1 min-w-0">
         {editing ? (
           <form onSubmit={handleRenameSubmit} className="flex gap-2">
