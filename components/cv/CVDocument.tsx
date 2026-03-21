@@ -1,892 +1,830 @@
-"use client";
+'use client'
 
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  Image,
-  Font,
-  Svg,
-  Path,
-} from "@react-pdf/renderer";
-import type { CVData, SectionKey } from "@/types/cv";
+import { Document, Page, Text, View, Image, Font, StyleSheet, Link } from '@react-pdf/renderer'
+import type { CVData, SectionKey } from '@/types/cv'
 
-Font.register({
-  family: "Roboto",
-  fonts: [
-    { src: "/fonts/Roboto-Regular.ttf" },
-    { src: "/fonts/Roboto-Bold.ttf", fontWeight: 700 },
-  ],
-});
-Font.register({
-  family: "Lato",
-  fonts: [
-    { src: "/fonts/Lato-Regular.ttf" },
-    { src: "/fonts/Lato-Bold.ttf", fontWeight: 700 },
-  ],
-});
-Font.register({
-  family: "Montserrat",
-  fonts: [
-    { src: "/fonts/Montserrat-Regular.ttf" },
-    { src: "/fonts/Montserrat-Bold.ttf", fontWeight: 700 },
-  ],
-});
-Font.register({
-  family: "Raleway",
-  fonts: [
-    { src: "/fonts/Raleway-Regular.ttf" },
-    { src: "/fonts/Raleway-Bold.ttf", fontWeight: 700 },
-  ],
-});
-Font.register({
-  family: "Playfair Display",
-  fonts: [
-    { src: "/fonts/PlayfairDisplay-Regular.ttf" },
-    { src: "/fonts/PlayfairDisplay-Bold.ttf", fontWeight: 700 },
-  ],
-});
-Font.register({
-  family: "Merriweather",
-  fonts: [
-    { src: "/fonts/Merriweather-Regular.ttf" },
-    { src: "/fonts/Merriweather-Bold.ttf", fontWeight: 700 },
-  ],
-});
+// ─── Zone 2: Font Registration ────────────────────────────────────────────────
 
-// Prevent react-pdf from hyphenating words at line breaks
-Font.registerHyphenationCallback((word) => [word]);
+const CUSTOM_FONTS = [
+  { family: 'Roboto', regular: '/fonts/Roboto-Regular.ttf', bold: '/fonts/Roboto-Bold.ttf' },
+  { family: 'Lato', regular: '/fonts/Lato-Regular.ttf', bold: '/fonts/Lato-Bold.ttf' },
+  { family: 'Montserrat', regular: '/fonts/Montserrat-Regular.ttf', bold: '/fonts/Montserrat-Bold.ttf' },
+  { family: 'Raleway', regular: '/fonts/Raleway-Regular.ttf', bold: '/fonts/Raleway-Bold.ttf' },
+  { family: 'Playfair Display', regular: '/fonts/PlayfairDisplay-Regular.ttf', bold: '/fonts/PlayfairDisplay-Bold.ttf' },
+  { family: 'Merriweather', regular: '/fonts/Merriweather-Regular.ttf', bold: '/fonts/Merriweather-Bold.ttf' },
+]
 
-const DARK = "#111827";
-const LIGHT_GRAY = "#E5E7EB";
-const GRAY = "#6B7280";
+CUSTOM_FONTS.forEach(({ family, regular, bold }) => {
+  Font.register({
+    family,
+    fonts: [
+      { src: regular, fontWeight: 'normal' },
+      { src: bold, fontWeight: 'bold' },
+    ],
+  })
+})
 
-/** Blend primaryColor at 12% opacity on white — always harmonious */
-function mkSecondary(hex: string): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  const a = 0.12;
-  const nr = Math.round(r * a + 255 * (1 - a));
-  const ng = Math.round(g * a + 255 * (1 - a));
-  const nb = Math.round(b * a + 255 * (1 - a));
-  return `#${nr.toString(16).padStart(2, "0")}${ng.toString(16).padStart(2, "0")}${nb.toString(16).padStart(2, "0")}`;
+// ─── Zone 3: Spacing Token System ─────────────────────────────────────────────
+
+interface SpacingTokens {
+  pagePaddingH: number
+  pagePaddingV: number
+  sectionGap: number
+  itemGap: number
+  headerToContent: number
+  lineGap: number
+  dividerTitleGap: number
 }
 
-const DENSITY_CONFIG = {
-  compact: { vPad: 24, hPad: 30, itemGap: 8, sectionGap: 18, lh: 1.4 },
-  normal: { vPad: 30, hPad: 36, itemGap: 10, sectionGap: 22, lh: 1.55 },
-  airy: { vPad: 36, hPad: 42, itemGap: 14, sectionGap: 28, lh: 1.65 },
-};
-
-export interface SectionTitles {
-  profile: string;
-  experience: string;
-  projects: string;
-  education: string;
-  certifications: string;
-  skills: string;
-  languages: string;
-  interests: string;
-  contact: string;
-  present: string;
+const DENSITY_TOKENS: Record<'compact' | 'normal' | 'airy', SpacingTokens> = {
+  compact: {
+    pagePaddingH: 28,
+    pagePaddingV: 24,
+    sectionGap: 13,
+    itemGap: 8,
+    headerToContent: 6,
+    lineGap: 2,
+    dividerTitleGap: 1,
+  },
+  normal: {
+    pagePaddingH: 32,
+    pagePaddingV: 28,
+    sectionGap: 18,
+    itemGap: 11,
+    headerToContent: 8,
+    lineGap: 3,
+    dividerTitleGap: 1,
+  },
+  airy: {
+    pagePaddingH: 36,
+    pagePaddingV: 34,
+    sectionGap: 24,
+    itemGap: 15,
+    headerToContent: 11,
+    lineGap: 4,
+    dividerTitleGap: 2,
+  },
 }
 
-// ─── Contact icons ───────────────────────────────────────────────────────────
+// ─── Zone 4: Helper Functions ──────────────────────────────────────────────────
 
-function Icon({ d, size = 8, color = '#000' }: { d: string; size?: number; color?: string }) {
-  return <Svg viewBox="0 0 24 24" width={size} height={size}><Path fill={color} d={d} /></Svg>
-}
-const ICON_PATHS = {
-  phone: 'M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.24 1.01l-2.2 2.2z',
-  mail: 'M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z',
-  home: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z',
-  linkedin: 'M19 3a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14m-.5 15.5v-5.3a3.26 3.26 0 00-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 011.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 001.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 00-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z',
-  github: 'M12 2A10 10 0 002 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5A10.003 10.003 0 0022 12 10 10 0 0012 2z',
-  globe: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z',
-}
-
-// ─── Shared micro-components ──────────────────────────────────────────────────
-
-function Pill({
-  name,
-  bg,
-  color,
-}: {
-  name: string;
-  bg: string;
-  color: string;
-}) {
-  return (
-    <View
-      style={{
-        backgroundColor: bg,
-        borderRadius: 3,
-        paddingVertical: 3,
-        paddingHorizontal: 8,
-        marginBottom: 4,
-        marginRight: 4,
-      }}
-    >
-      <Text style={{ fontSize: 8, color, fontWeight: "bold" }}>{name}</Text>
-    </View>
-  );
+function darkenColor(hex: string, factor: number): string {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  const dr = Math.round(r * factor)
+    .toString(16)
+    .padStart(2, '0')
+  const dg = Math.round(g * factor)
+    .toString(16)
+    .padStart(2, '0')
+  const db = Math.round(b * factor)
+    .toString(16)
+    .padStart(2, '0')
+  return `#${dr}${dg}${db}`
 }
 
-// ─── Single-column layout ────────────────────────────────────────────────────
+function parseDateValue(dateStr: string): number {
+  if (!dateStr) return 0
+  const parts = dateStr.trim().split(' ')
+  const year = parseInt(parts[parts.length - 1], 10) || 0
+  return year
+}
 
-function singleStyles(
-  accent: string,
-  divider: string,
-  d: (typeof DENSITY_CONFIG)["normal"],
-) {
+function sortByDateDesc<T extends { startDate?: string; year?: string }>(items: T[]): T[] {
+  return [...items].sort((a, b) => {
+    const dateA = parseDateValue(a.startDate || a.year || '')
+    const dateB = parseDateValue(b.startDate || b.year || '')
+    return dateB - dateA
+  })
+}
+
+// ─── Zone 5: StyleSheet Factory ────────────────────────────────────────────────
+
+function _buildStyles(template: CVData['template']) {
+  const sp = DENSITY_TOKENS[template.density]
+  const sidebarBg = darkenColor(template.accentColor, 0.4)
+
   return StyleSheet.create({
+    // Page
     page: {
-      fontFamily: "Roboto",
-      fontSize: 9,
-      color: DARK,
-      paddingTop: d.vPad,
-      paddingBottom: d.vPad,
-      paddingHorizontal: d.hPad,
-      lineHeight: d.lh,
+      fontFamily: template.font,
+      backgroundColor: '#FFFFFF',
+      paddingHorizontal: sp.pagePaddingH,
+      paddingTop: sp.pagePaddingV,
+      paddingBottom: sp.pagePaddingV,
     },
-    header: { marginBottom: 0 },
-    headerRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "flex-end",
-    } as const,
+    pageNopadding: {
+      fontFamily: template.font,
+      backgroundColor: '#FFFFFF',
+      padding: 0,
+    },
+
+    // Typography — Header/Name
     name: {
-      fontSize: 25,
-      fontWeight: "bold",
-      lineHeight: 1.0,
-      color: accent,
-      textAlign: "center",
-      flex: 1,
-      paddingBottom: 0,
-      marginBottom: 0,
+      fontSize: 22,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      marginBottom: 3,
+      color: '#000000',
     },
-    jobTitleSection: { marginTop: d.sectionGap },
     jobTitle: {
       fontSize: 9,
-      fontWeight: "bold",
-      color: "#666666",
-      borderLeftWidth: 3,
-      borderLeftColor: accent,
-      paddingLeft: 6,
-      paddingBottom: 3,
-      marginBottom: 0,
-      textTransform: "uppercase",
-    } as const,
-    jobTitleDivider: {
-      borderBottomWidth: 1,
-      borderBottomColor: divider,
-      marginBottom: 8,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      color: template.accentColor,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      marginTop: 4,
+    },
+    contactLine: {
+      fontSize: 8,
+      color: '#64748B',
+      textAlign: 'center',
+    },
+    socialLink: {
+      fontSize: 8,
+      color: template.accentColor,
+      textDecoration: 'none',
+    },
+
+    // Typography — Sections
+    sectionTitle: {
+      fontSize: 9,
+      fontWeight: 'bold',
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      color: '#1E293B',
+    },
+    sectionHeaderRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    accentBar: {
+      width: 3,
+      height: 13,
+      backgroundColor: template.accentColor,
+      borderRadius: 1.5,
+      marginRight: 6,
+    },
+    dividerLine: {
+      height: 0.75,
+      backgroundColor: template.dividerColor,
+      marginTop: sp.dividerTitleGap,
+    },
+
+    // Typography — Items
+    itemTitle: {
+      fontSize: 9.5,
+      fontWeight: 'bold',
+      color: '#1E293B',
+    },
+    itemSubtitle: {
+      fontSize: 8.5,
+      color: '#64748B',
+    },
+    bodyText: {
+      fontSize: 8.5,
+      color: '#374151',
+      lineHeight: 1.5,
+    },
+    metaText: {
+      fontSize: 8,
+      color: '#94A3B8',
+    },
+
+    // Skills
+    skillPill: {
+      borderWidth: 1,
+      borderColor: template.dividerColor,
+      borderRadius: 4,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      marginBottom: 3,
+      marginRight: 3,
+    },
+    skillPillText: {
+      fontSize: 7.5,
+      color: '#374151',
+    },
+
+    // Sidebar layout
+    sidebarContainer: {
+      flexDirection: 'row',
+      flex: 1,
+    },
+    sidebarBg: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      bottom: 0,
+      width: '30%',
+      backgroundColor: sidebarBg,
+    },
+    sidebar: {
+      width: '30%',
+      paddingHorizontal: 18,
+      paddingTop: sp.pagePaddingV + 16,
+      paddingBottom: 18,
+      color: '#FFFFFF',
+    },
+    mainColumn: {
+      flex: 1,
+      paddingLeft: sp.pagePaddingH * 0.75,
+      paddingRight: sp.pagePaddingH,
+      paddingTop: sp.pagePaddingV + 16,
     },
     photo: {
       width: 72,
       height: 72,
-      borderRadius: 4,
-      objectFit: "cover",
-    } as const,
-    contactLine: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      alignItems: "center",
-      justifyContent: "center",
+      borderRadius: 36,
+      alignSelf: 'center',
+    },
+    sidebarName: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: '#FFFFFF',
+      marginTop: 10,
+      textAlign: 'center',
+    },
+    sidebarJobTitle: {
       fontSize: 8.5,
-      marginTop: 5,
-      marginBottom: 4,
+      color: 'rgba(255, 255, 255, 0.7)',
+      marginTop: 2,
+      textAlign: 'center',
     },
-    contactItem: { flexDirection: "row", alignItems: "center", gap: 3 },
-    contactText: { fontSize: 8.5, color: DARK },
-    contactDot: {
-      fontSize: 14,
-      color: divider,
-      marginHorizontal: 6,
-      marginTop: -2,
+    sidebarSectionTitle: {
+      fontSize: 8,
+      fontWeight: 'bold',
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      color: 'rgba(255, 255, 255, 0.55)',
     },
-    section: { marginTop: d.sectionGap },
-    sectionTitle: {
-      fontSize: 9,
-      fontWeight: "bold",
-      color: accent,
-      borderLeftWidth: 3,
-      borderLeftColor: accent,
-      paddingLeft: 6,
-      paddingBottom: 3,
-      marginBottom: 0,
-      textTransform: "uppercase",
+    sidebarDivider: {
+      height: 0.5,
+      backgroundColor: 'rgba(255, 255, 255, 0.2)',
     },
-    divider: {
-      borderBottomWidth: 1,
-      borderBottomColor: divider,
-      marginBottom: 8,
+    sidebarBodyText: {
+      fontSize: 8,
+      color: 'rgba(255, 255, 255, 0.85)',
+      lineHeight: 1.4,
     },
-    summaryText: { color: GRAY, fontSize: 9, lineHeight: d.lh },
-    expItem: {},
-    expItemGap: { marginTop: d.itemGap },
-    expRole: { fontSize: 9.5, fontWeight: "bold" },
-    expMeta: { color: "#888888", fontSize: 8, marginTop: 4 },
-    expDesc: { color: GRAY, fontSize: 8.5, marginTop: 4, lineHeight: d.lh },
-    projLink: { color: accent, fontSize: 8.5, marginTop: 3 },
-    eduItem: {},
-    eduItemGap: { marginTop: d.itemGap },
-    eduHeader: { flexDirection: "row", justifyContent: "space-between" },
-    eduDegree: { fontSize: 9.5, fontWeight: "bold" },
-    eduYear: { color: GRAY, fontSize: 8.5 },
-    eduSchool: { color: GRAY, fontSize: 8.5, marginTop: 2 },
-    certName: { fontSize: 9.5, fontWeight: "bold" },
-    certMeta: { color: GRAY, fontSize: 8.5, marginTop: 2 },
-    skillsGrid: { flexDirection: "row", flexWrap: "wrap" },
-    langRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-    langItem: { flexDirection: "row", gap: 4 },
-    langName: { fontSize: 8.5, fontWeight: "bold" },
-    langLevel: { fontSize: 8.5, color: GRAY },
-    interestText: { fontSize: 8.5, color: GRAY, lineHeight: d.lh },
-  });
+    sidebarItemTitle: {
+      fontSize: 8.5,
+      fontWeight: 'bold',
+      color: '#FFFFFF',
+    },
+  })
 }
 
-function SingleLayout({ cv, titles }: { cv: CVData; titles: SectionTitles }) {
-  const {
-    personal,
-    experiences,
-    education,
-    skills,
-    languages,
-    template,
-    projects,
-    certifications,
-    interests,
-  } = cv;
-  const { accentColor, dividerColor, hiddenSections, density } = template;
-  const d = DENSITY_CONFIG[density ?? "normal"];
-  const secondary = mkSecondary(accentColor);
-  const s = singleStyles(accentColor, dividerColor ?? LIGHT_GRAY, d);
-  const font = template.font;
-  const isHidden = (key: SectionKey) => hiddenSections?.includes(key);
+type Styles = ReturnType<typeof _buildStyles>
 
-  const hasSocial = personal.linkedin || personal.github || personal.portfolio;
+let _lastTemplate: CVData['template'] | null = null
+let _lastStyles: Styles | null = null
+
+function makeStyles(template: CVData['template']): Styles {
+  if (_lastTemplate === template) return _lastStyles!
+  _lastTemplate = template
+  _lastStyles = _buildStyles(template)
+  return _lastStyles
+}
+
+// ─── Zone 6: Primitive Components ──────────────────────────────────────────────
+
+function Dot({ styles }: { styles: Styles }) {
+  return <Text style={[styles.contactLine, { marginHorizontal: 4 }]}>·</Text>
+}
+
+function SectionHeader({ title, styles }: { title: string; styles: Styles }) {
+  return (
+    <View>
+      <View style={styles.sectionHeaderRow}>
+        <View style={styles.accentBar} />
+        <Text style={styles.sectionTitle}>{title.toUpperCase()}</Text>
+      </View>
+      <View style={styles.dividerLine} />
+    </View>
+  )
+}
+
+function SidebarSectionHeader({ title, styles, sp }: { title: string; styles: Styles; sp: SpacingTokens }) {
+  return (
+    <View style={{ marginTop: sp.sectionGap }}>
+      <Text style={styles.sidebarSectionTitle}>{title.toUpperCase()}</Text>
+      <View style={[styles.sidebarDivider, { marginTop: sp.dividerTitleGap }]} />
+    </View>
+  )
+}
+
+function LevelDots({ level, accentColor }: { level: number; accentColor: string }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: 2 }}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <View
+          key={i}
+          style={{
+            width: 5,
+            height: 5,
+            borderRadius: 2.5,
+            backgroundColor: i <= level ? accentColor : '#E2E8F0',
+          }}
+        />
+      ))}
+    </View>
+  )
+}
+
+// ─── Zone 7: Section Item Components ───────────────────────────────────────────
+
+function ExperienceItem({
+  exp,
+  styles,
+  sp,
+  presentLabel,
+  isFirst,
+}: {
+  exp: CVData['experiences'][number]
+  styles: Styles
+  sp: SpacingTokens
+  presentLabel: string
+  isFirst: boolean
+}) {
+  const dateRange = [exp.startDate, exp.current ? presentLabel : exp.endDate].filter(Boolean).join(' – ')
+  return (
+    <View style={isFirst ? undefined : { marginTop: sp.itemGap }} wrap={false}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <Text style={styles.itemTitle}>{exp.role}</Text>
+      </View>
+      <Text style={[styles.itemSubtitle, { marginTop: 1 }]}>{[exp.company, dateRange].filter(Boolean).join('  ·  ')}</Text>
+      {exp.description ? <Text style={[styles.bodyText, { marginTop: sp.lineGap + 2 }]}>{exp.description}</Text> : null}
+    </View>
+  )
+}
+
+function EducationItem({
+  edu,
+  styles,
+  sp,
+  isFirst,
+}: {
+  edu: CVData['education'][number]
+  styles: Styles
+  sp: SpacingTokens
+  isFirst: boolean
+}) {
+  const degreeField = [edu.degree, edu.field].filter(Boolean).join(' — ')
+  return (
+    <View style={isFirst ? undefined : { marginTop: sp.itemGap }} wrap={false}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <Text style={styles.itemTitle}>{degreeField}</Text>
+        {edu.year ? <Text style={styles.metaText}>{edu.year}</Text> : null}
+      </View>
+      {edu.school ? <Text style={styles.itemSubtitle}>{edu.school}</Text> : null}
+    </View>
+  )
+}
+
+function ProjectItem({
+  project,
+  styles,
+  sp,
+  isFirst,
+}: {
+  project: CVData['projects'][number]
+  styles: Styles
+  sp: SpacingTokens
+  isFirst: boolean
+}) {
+  return (
+    <View style={isFirst ? undefined : { marginTop: sp.itemGap }} wrap={false}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        {project.url ? (
+          <Link src={project.url} style={styles.itemTitle}>
+            {project.name}
+          </Link>
+        ) : (
+          <Text style={styles.itemTitle}>{project.name}</Text>
+        )}
+        {project.year ? <Text style={styles.metaText}>{project.year}</Text> : null}
+      </View>
+      {project.description ? <Text style={[styles.bodyText, { marginTop: sp.lineGap }]}>{project.description}</Text> : null}
+    </View>
+  )
+}
+
+function CertificationItem({
+  cert,
+  styles,
+  sp,
+  isFirst,
+}: {
+  cert: CVData['certifications'][number]
+  styles: Styles
+  sp: SpacingTokens
+  isFirst: boolean
+}) {
+  return (
+    <View style={isFirst ? undefined : { marginTop: sp.itemGap }} wrap={false}>
+      <Text style={styles.itemTitle}>{cert.name}</Text>
+      <Text style={styles.itemSubtitle}>{[cert.issuer, cert.year].filter(Boolean).join('  ·  ')}</Text>
+    </View>
+  )
+}
+
+function SkillsPills({ skills, styles }: { skills: CVData['skills']; styles: Styles }) {
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+      {skills.map((skill, i) => (
+        <View key={i} style={styles.skillPill}>
+          <Text style={styles.skillPillText}>{skill.name}</Text>
+        </View>
+      ))}
+    </View>
+  )
+}
+
+function LanguageItems({ languages, styles, sp }: { languages: CVData['languages']; styles: Styles; sp: SpacingTokens }) {
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+      {languages.map((lang, i) => (
+        <View key={i} style={{ flexDirection: 'row', gap: 4, alignItems: 'center', marginRight: sp.itemGap }}>
+          <Text style={styles.itemTitle}>{lang.name}</Text>
+          <Text style={styles.itemSubtitle}>{lang.level}</Text>
+        </View>
+      ))}
+    </View>
+  )
+}
+
+function InterestsLine({ interests, styles }: { interests: string[]; styles: Styles }) {
+  const filtered = interests.filter(Boolean)
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+      {filtered.map((item, i) => (
+        <View key={i} style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {i > 0 && <Dot styles={styles} />}
+          <Text style={styles.bodyText}>{item}</Text>
+        </View>
+      ))}
+    </View>
+  )
+}
+
+function Header({ personal, styles, sp }: { personal: CVData['personal']; styles: Styles; sp: SpacingTokens }) {
+  const contactItems = [personal.phone, personal.city, personal.email].filter(Boolean)
+  const socialLinks = [
+    personal.linkedin && { label: 'LinkedIn', url: personal.linkedin },
+    personal.github && { label: 'GitHub', url: personal.github },
+    personal.portfolio && { label: 'Portfolio', url: personal.portfolio },
+  ].filter(Boolean) as { label: string; url: string }[]
 
   return (
-    <Page size="A4" style={[s.page, { fontFamily: font }]}>
-      {/* Header Block */}
-      <View style={s.header}>
-        <View style={s.headerRow}>
-          {cv.photo ? <View style={{ width: 72 }} /> : null}
-          <Text style={s.name}>
+    <View style={{ marginTop: 16, marginBottom: sp.sectionGap }}>
+      <Text style={styles.name}>
+        {personal.firstName} {personal.lastName}
+      </Text>
+      {contactItems.length > 0 && (
+        <View style={{ flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap' }}>
+          {contactItems.map((item, i) => (
+            <View key={i} style={{ flexDirection: 'row', alignItems: 'center' }}>
+              {i > 0 && <Dot styles={styles} />}
+              <Text style={styles.contactLine}>{item}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+      {personal.jobTitle && <Text style={styles.jobTitle}>{personal.jobTitle}</Text>}
+      {socialLinks.length > 0 && (
+        <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 12, marginTop: 4 }}>
+          {socialLinks.map(({ label, url }) => (
+            <Link key={label} src={url} style={styles.socialLink}>
+              {label}
+            </Link>
+          ))}
+        </View>
+      )}
+    </View>
+  )
+}
+
+// ─── Zone 9: SingleLayout ─────────────────────────────────────────────────────
+
+interface LayoutProps {
+  cv: CVData
+  sectionTitles: Record<string, string>
+  styles: Styles
+  sp: SpacingTokens
+}
+
+function SingleLayout({ cv, sectionTitles, styles, sp }: LayoutProps) {
+  const { personal, skills, languages, interests, template } = cv
+  const experiences = sortByDateDesc(cv.experiences)
+  const projects = sortByDateDesc(cv.projects)
+  const education = sortByDateDesc(cv.education)
+  const certifications = sortByDateDesc(cv.certifications)
+  const { hiddenSections } = template
+
+  const summaryVisible = !hiddenSections.includes('summary') && !!personal.summary.trim()
+  const isVisible = (key: SectionKey, items: unknown[]): boolean => !hiddenSections.includes(key) && items.length > 0
+
+  return (
+    <Page size="A4" style={styles.page}>
+      <Header personal={personal} styles={styles} sp={sp} />
+
+      {summaryVisible && (
+        <View wrap={false} style={{ marginBottom: sp.sectionGap }}>
+          <SectionHeader title={sectionTitles.profile} styles={styles} />
+          <Text style={[styles.bodyText, { marginTop: sp.headerToContent }]}>{personal.summary}</Text>
+        </View>
+      )}
+
+      {isVisible('experiences', experiences) && (
+        <View style={{ marginBottom: sp.sectionGap }}>
+          {experiences.map((exp, i) =>
+            i === 0 ? (
+              <View key={exp.id} wrap={false}>
+                <SectionHeader title={sectionTitles.experience} styles={styles} />
+                <View style={{ marginTop: sp.headerToContent }}>
+                  <ExperienceItem exp={exp} styles={styles} sp={sp} presentLabel={sectionTitles.present} isFirst />
+                </View>
+              </View>
+            ) : (
+              <ExperienceItem key={exp.id} exp={exp} styles={styles} sp={sp} presentLabel={sectionTitles.present} isFirst={false} />
+            ),
+          )}
+        </View>
+      )}
+
+      {isVisible('projects', projects) && (
+        <View style={{ marginBottom: sp.sectionGap }}>
+          {projects.map((proj, i) =>
+            i === 0 ? (
+              <View key={proj.id} wrap={false}>
+                <SectionHeader title={sectionTitles.projects} styles={styles} />
+                <View style={{ marginTop: sp.headerToContent }}>
+                  <ProjectItem project={proj} styles={styles} sp={sp} isFirst />
+                </View>
+              </View>
+            ) : (
+              <ProjectItem key={proj.id} project={proj} styles={styles} sp={sp} isFirst={false} />
+            ),
+          )}
+        </View>
+      )}
+
+      {isVisible('education', education) && (
+        <View style={{ marginBottom: sp.sectionGap }}>
+          {education.map((edu, i) =>
+            i === 0 ? (
+              <View key={edu.id} wrap={false}>
+                <SectionHeader title={sectionTitles.education} styles={styles} />
+                <View style={{ marginTop: sp.headerToContent }}>
+                  <EducationItem edu={edu} styles={styles} sp={sp} isFirst />
+                </View>
+              </View>
+            ) : (
+              <EducationItem key={edu.id} edu={edu} styles={styles} sp={sp} isFirst={false} />
+            ),
+          )}
+        </View>
+      )}
+
+      {isVisible('certifications', certifications) && (
+        <View style={{ marginBottom: sp.sectionGap }}>
+          {certifications.map((cert, i) =>
+            i === 0 ? (
+              <View key={cert.id} wrap={false}>
+                <SectionHeader title={sectionTitles.certifications} styles={styles} />
+                <View style={{ marginTop: sp.headerToContent }}>
+                  <CertificationItem cert={cert} styles={styles} sp={sp} isFirst />
+                </View>
+              </View>
+            ) : (
+              <CertificationItem key={cert.id} cert={cert} styles={styles} sp={sp} isFirst={false} />
+            ),
+          )}
+        </View>
+      )}
+
+      {isVisible('skills', skills) && (
+        <View wrap={false} style={{ marginBottom: sp.sectionGap }}>
+          <SectionHeader title={sectionTitles.skills} styles={styles} />
+          <View style={{ marginTop: sp.headerToContent }}>
+            <SkillsPills skills={skills} styles={styles} />
+          </View>
+        </View>
+      )}
+
+      {isVisible('languages', languages) && (
+        <View wrap={false} style={{ marginBottom: sp.sectionGap }}>
+          <SectionHeader title={sectionTitles.languages} styles={styles} />
+          <View style={{ marginTop: sp.headerToContent }}>
+            <LanguageItems languages={languages} styles={styles} sp={sp} />
+          </View>
+        </View>
+      )}
+
+      {isVisible('interests', interests) && (
+        <View wrap={false} style={{ marginBottom: sp.sectionGap }}>
+          <SectionHeader title={sectionTitles.interests} styles={styles} />
+          <View style={{ marginTop: sp.headerToContent }}>
+            <InterestsLine interests={interests} styles={styles} />
+          </View>
+        </View>
+      )}
+    </Page>
+  )
+}
+
+// ─── Zone 10: SidebarLayout ───────────────────────────────────────────────────
+
+function SidebarLayout({ cv, sectionTitles, styles, sp }: LayoutProps) {
+  const { personal, skills, languages, interests, photo, template } = cv
+  const experiences = sortByDateDesc(cv.experiences)
+  const projects = sortByDateDesc(cv.projects)
+  const education = sortByDateDesc(cv.education)
+  const certifications = sortByDateDesc(cv.certifications)
+  const { hiddenSections } = template
+
+  const summaryVisible = !hiddenSections.includes('summary') && !!personal.summary.trim()
+  const isVisible = (key: SectionKey, items: unknown[]): boolean => !hiddenSections.includes(key) && items.length > 0
+
+  const contactItems = [
+    personal.phone && { label: sectionTitles.contact, value: personal.phone },
+    personal.email && { value: personal.email },
+    (personal.city || personal.country) && { value: [personal.city, personal.country].filter(Boolean).join(', ') },
+    personal.linkedin && { url: personal.linkedin, value: 'LinkedIn' },
+    personal.github && { url: personal.github, value: 'GitHub' },
+    personal.portfolio && { url: personal.portfolio, value: 'Portfolio' },
+  ].filter(Boolean) as { url?: string; value: string }[]
+
+  return (
+    <Page size="A4" style={styles.pageNopadding}>
+      <View style={styles.sidebarBg} fixed />
+      <View style={styles.sidebarContainer}>
+        {/* LEFT SIDEBAR */}
+        <View style={styles.sidebar}>
+          {/* eslint-disable-next-line jsx-a11y/alt-text */}
+          {photo && <Image src={photo} style={styles.photo} />}
+          <Text style={styles.sidebarName}>
             {personal.firstName} {personal.lastName}
           </Text>
-          {cv.photo ? <Image src={cv.photo} style={s.photo} /> : null}
+          {personal.jobTitle && <Text style={styles.sidebarJobTitle}>{personal.jobTitle}</Text>}
+
+          {/* Contact block */}
+          {contactItems.length > 0 && (
+            <>
+              <SidebarSectionHeader title={sectionTitles.contact} styles={styles} sp={sp} />
+              {contactItems.map((item, i) => (
+                <View key={i} style={i === 0 ? undefined : { marginTop: sp.lineGap }}>
+                  {item.url ? (
+                    <Link src={item.url} style={styles.sidebarBodyText}>
+                      {item.value}
+                    </Link>
+                  ) : (
+                    <Text style={styles.sidebarBodyText}>{item.value}</Text>
+                  )}
+                </View>
+              ))}
+            </>
+          )}
+
+          {/* Skills */}
+          {isVisible('skills', skills) && (
+            <>
+              <SidebarSectionHeader title={sectionTitles.skills} styles={styles} sp={sp} />
+              {skills.map((skill, i) => (
+                <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', ...(i > 0 && { marginTop: sp.lineGap }) }}>
+                  <Text style={styles.sidebarBodyText}>{skill.name}</Text>
+                  <LevelDots level={skill.level} accentColor="#FFFFFF" />
+                </View>
+              ))}
+            </>
+          )}
+
+          {/* Languages */}
+          {isVisible('languages', languages) && (
+            <>
+              <SidebarSectionHeader title={sectionTitles.languages} styles={styles} sp={sp} />
+              {languages.map((lang, i) => (
+                <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', ...(i > 0 && { marginTop: sp.lineGap }) }}>
+                  <Text style={styles.sidebarItemTitle}>{lang.name}</Text>
+                  <Text style={styles.sidebarBodyText}>{lang.level}</Text>
+                </View>
+              ))}
+            </>
+          )}
+
+          {/* Interests */}
+          {isVisible('interests', interests) && (
+            <>
+              <SidebarSectionHeader title={sectionTitles.interests} styles={styles} sp={sp} />
+              <Text style={styles.sidebarBodyText}>{interests.filter(Boolean).join('  ·  ')}</Text>
+            </>
+          )}
         </View>
 
-        {/* Contact info under name: phone · city · email */}
-        {(personal.phone ||
-          personal.email ||
-          personal.city ||
-          personal.country) && (
-          <View style={s.contactLine}>
-            {(() => {
-              const items: React.ReactNode[] = [];
-              if (personal.phone) {
-                items.push(
-                  <View key="phone" style={s.contactItem}>
-                    <Icon d={ICON_PATHS.phone} size={8} color={accentColor} />
-                    <Text style={s.contactText}>{personal.phone}</Text>
-                  </View>,
-                );
-              }
-              if (personal.city || personal.country) {
-                if (items.length > 0)
-                  items.push(
-                    <Text key="d1" style={s.contactDot}>·</Text>,
-                  );
-                items.push(
-                  <View key="loc" style={s.contactItem}>
-                    <Icon d={ICON_PATHS.home} size={8} color={accentColor} />
-                    <Text style={s.contactText}>
-                      {[personal.city, personal.country].filter(Boolean).join(", ")}
-                    </Text>
-                  </View>,
-                );
-              }
-              if (personal.email) {
-                if (items.length > 0)
-                  items.push(
-                    <Text key="d2" style={s.contactDot}>·</Text>,
-                  );
-                items.push(
-                  <View key="email" style={s.contactItem}>
-                    <Icon d={ICON_PATHS.mail} size={8} color={accentColor} />
-                    <Text style={s.contactText}>{personal.email}</Text>
-                  </View>,
-                );
-              }
-              return items;
-            })()}
-          </View>
-        )}
-      </View>
+        {/* RIGHT MAIN COLUMN */}
+        <View style={styles.mainColumn}>
+          {summaryVisible && (
+            <View wrap={false} style={{ marginBottom: sp.sectionGap }}>
+              <SectionHeader title={sectionTitles.profile} styles={styles} />
+              <Text style={[styles.bodyText, { marginTop: sp.headerToContent }]}>{personal.summary}</Text>
+            </View>
+          )}
 
-      {/* Job title section */}
-      {personal.jobTitle ? (
-        <View style={s.jobTitleSection}>
-          <Text style={s.jobTitle}>{personal.jobTitle}</Text>
-          <View style={s.jobTitleDivider} />
-          {/* Social links under job title divider */}
-          {hasSocial && (
-            <View style={s.contactLine}>
-              {personal.linkedin && (
-                <View style={s.contactItem}>
-                  <Icon d={ICON_PATHS.linkedin} size={8} color={accentColor} />
-                  <Text style={s.contactText}>{personal.linkedin}</Text>
-                </View>
+          {isVisible('experiences', experiences) && (
+            <View style={{ marginBottom: sp.sectionGap }}>
+              {experiences.map((exp, i) =>
+                i === 0 ? (
+                  <View key={exp.id} wrap={false}>
+                    <SectionHeader title={sectionTitles.experience} styles={styles} />
+                    <View style={{ marginTop: sp.headerToContent }}>
+                      <ExperienceItem exp={exp} styles={styles} sp={sp} presentLabel={sectionTitles.present} isFirst />
+                    </View>
+                  </View>
+                ) : (
+                  <ExperienceItem key={exp.id} exp={exp} styles={styles} sp={sp} presentLabel={sectionTitles.present} isFirst={false} />
+                ),
               )}
-              {personal.github && (
-                <View style={s.contactItem}>
-                  <Icon d={ICON_PATHS.github} size={8} color={accentColor} />
-                  <Text style={s.contactText}>{personal.github}</Text>
-                </View>
+            </View>
+          )}
+
+          {isVisible('projects', projects) && (
+            <View style={{ marginBottom: sp.sectionGap }}>
+              {projects.map((proj, i) =>
+                i === 0 ? (
+                  <View key={proj.id} wrap={false}>
+                    <SectionHeader title={sectionTitles.projects} styles={styles} />
+                    <View style={{ marginTop: sp.headerToContent }}>
+                      <ProjectItem project={proj} styles={styles} sp={sp} isFirst />
+                    </View>
+                  </View>
+                ) : (
+                  <ProjectItem key={proj.id} project={proj} styles={styles} sp={sp} isFirst={false} />
+                ),
               )}
-              {personal.portfolio && (
-                <View style={s.contactItem}>
-                  <Icon d={ICON_PATHS.globe} size={8} color={accentColor} />
-                  <Text style={s.contactText}>{personal.portfolio}</Text>
-                </View>
+            </View>
+          )}
+
+          {isVisible('education', education) && (
+            <View style={{ marginBottom: sp.sectionGap }}>
+              {education.map((edu, i) =>
+                i === 0 ? (
+                  <View key={edu.id} wrap={false}>
+                    <SectionHeader title={sectionTitles.education} styles={styles} />
+                    <View style={{ marginTop: sp.headerToContent }}>
+                      <EducationItem edu={edu} styles={styles} sp={sp} isFirst />
+                    </View>
+                  </View>
+                ) : (
+                  <EducationItem key={edu.id} edu={edu} styles={styles} sp={sp} isFirst={false} />
+                ),
+              )}
+            </View>
+          )}
+
+          {isVisible('certifications', certifications) && (
+            <View style={{ marginBottom: sp.sectionGap }}>
+              {certifications.map((cert, i) =>
+                i === 0 ? (
+                  <View key={cert.id} wrap={false}>
+                    <SectionHeader title={sectionTitles.certifications} styles={styles} />
+                    <View style={{ marginTop: sp.headerToContent }}>
+                      <CertificationItem cert={cert} styles={styles} sp={sp} isFirst />
+                    </View>
+                  </View>
+                ) : (
+                  <CertificationItem key={cert.id} cert={cert} styles={styles} sp={sp} isFirst={false} />
+                ),
               )}
             </View>
           )}
         </View>
-      ) : null}
-
-      {/* Profile / Summary */}
-      {!isHidden("summary") && personal.summary ? (
-        <View style={s.section}>
-          <Text style={s.sectionTitle}>{titles.profile}</Text>
-          <View style={s.divider} />
-          <Text style={s.summaryText}>{personal.summary}</Text>
-        </View>
-      ) : null}
-
-      {/* Experience — role bold on line 1, company · dates on line 2 */}
-      {!isHidden("experiences") && experiences.length > 0 && (
-        <View style={s.section}>
-          <Text style={s.sectionTitle}>{titles.experience}</Text>
-          <View style={s.divider} />
-          {experiences.map((exp, i) => {
-            const datePart = [
-              exp.startDate,
-              exp.current ? titles.present : exp.endDate,
-            ]
-              .filter(Boolean)
-              .join(" – ");
-            const meta = [exp.company, datePart].filter(Boolean).join("  ·  ");
-            return (
-              <View key={exp.id} style={[s.expItem, i > 0 && s.expItemGap]}>
-                <Text style={s.expRole}>{exp.role}</Text>
-                {meta ? <Text style={s.expMeta}>{meta}</Text> : null}
-                {exp.description ? (
-                  <Text style={s.expDesc}>{exp.description}</Text>
-                ) : null}
-              </View>
-            );
-          })}
-        </View>
-      )}
-
-      {/* Projects */}
-      {!isHidden("projects") && projects.length > 0 && (
-        <View style={s.section}>
-          <Text style={s.sectionTitle}>{titles.projects}</Text>
-          <View style={s.divider} />
-          {projects.map((proj, i) => (
-            <View key={proj.id} style={[s.expItem, i > 0 && s.expItemGap]}>
-              <Text style={s.expRole}>{proj.name}</Text>
-              {proj.year ? <Text style={s.expMeta}>{proj.year}</Text> : null}
-              {proj.description ? (
-                <Text style={s.expDesc}>{proj.description}</Text>
-              ) : null}
-              {proj.url ? <Text style={s.projLink}>{proj.url}</Text> : null}
-            </View>
-          ))}
-        </View>
-      )}
-
-      {/* Skills */}
-      {!isHidden("skills") && skills.length > 0 && (
-        <View style={s.section} wrap={false}>
-          <Text style={s.sectionTitle}>{titles.skills}</Text>
-          <View style={s.divider} />
-          <View style={s.skillsGrid}>
-            {skills.map((skill, i) => (
-              <Pill
-                key={i}
-                name={skill.name}
-                bg={secondary}
-                color={accentColor}
-              />
-            ))}
-          </View>
-        </View>
-      )}
-
-      {/* Languages */}
-      {!isHidden("languages") && languages.length > 0 && (
-        <View style={s.section} wrap={false}>
-          <Text style={s.sectionTitle}>{titles.languages}</Text>
-          <View style={s.divider} />
-          <View style={s.langRow}>
-            {languages.map((lang) => (
-              <View key={lang.id} style={s.langItem}>
-                <Text style={s.langName}>{lang.name}</Text>
-                {lang.level ? (
-                  <Text style={s.langLevel}>({lang.level})</Text>
-                ) : null}
-              </View>
-            ))}
-          </View>
-        </View>
-      )}
-
-      {/* Education */}
-      {!isHidden("education") && education.length > 0 && (
-        <View style={s.section} wrap={false}>
-          <Text style={s.sectionTitle}>{titles.education}</Text>
-          <View style={s.divider} />
-          {education.map((edu, i) => (
-            <View key={edu.id} style={[s.eduItem, i > 0 && s.eduItemGap]}>
-              <View style={s.eduHeader}>
-                <Text style={s.eduDegree}>
-                  {edu.degree}
-                  {edu.field ? ` — ${edu.field}` : ""}
-                </Text>
-                {edu.year ? <Text style={s.eduYear}>{edu.year}</Text> : null}
-              </View>
-              {edu.school ? (
-                <Text style={s.eduSchool}>{edu.school}</Text>
-              ) : null}
-            </View>
-          ))}
-        </View>
-      )}
-
-      {/* Certifications */}
-      {!isHidden("certifications") && certifications.length > 0 && (
-        <View style={s.section} wrap={false}>
-          <Text style={s.sectionTitle}>{titles.certifications}</Text>
-          <View style={s.divider} />
-          {certifications.map((cert, i) => (
-            <View key={cert.id} style={[s.eduItem, i > 0 && s.eduItemGap]}>
-              <Text style={s.certName}>{cert.name}</Text>
-              {cert.issuer || cert.year ? (
-                <Text style={s.certMeta}>
-                  {[cert.issuer, cert.year].filter(Boolean).join("  ·  ")}
-                </Text>
-              ) : null}
-            </View>
-          ))}
-        </View>
-      )}
-
-      {/* Interests */}
-      {!isHidden("interests") && interests.length > 0 && (
-        <View style={s.section} wrap={false}>
-          <Text style={s.sectionTitle}>{titles.interests}</Text>
-          <View style={s.divider} />
-          <Text style={s.interestText}>{interests.join("  ·  ")}</Text>
-        </View>
-      )}
-    </Page>
-  );
-}
-
-// ─── Sidebar layout ───────────────────────────────────────────────────────────
-
-function sidebarStyles(
-  accent: string,
-  divider: string,
-  d: (typeof DENSITY_CONFIG)["normal"],
-) {
-  return StyleSheet.create({
-    page: {
-      fontFamily: "Roboto",
-      fontSize: 9,
-      color: DARK,
-      flexDirection: "row",
-    },
-    left: {
-      width: "32%",
-      backgroundColor: accent,
-      paddingVertical: d.vPad,
-      paddingHorizontal: 18,
-      flexDirection: "column",
-    },
-    right: {
-      flex: 1,
-      paddingVertical: d.vPad,
-      paddingHorizontal: 22,
-      flexDirection: "column",
-    },
-    nameBlock: { marginBottom: 10 },
-    name: {
-      fontSize: 18,
-      fontWeight: "bold",
-      color: "#fff",
-      lineHeight: 1.2,
-      width: "100%",
-    },
-    photo: {
-      width: 76,
-      height: 76,
-      borderRadius: 4,
-      marginBottom: 10,
-      alignSelf: "center",
-      borderWidth: 2,
-      borderColor: "rgba(255,255,255,0.75)",
-      objectFit: "cover",
-    } as const,
-    jobTitle: {
-      fontSize: 7.5,
-      fontWeight: "bold",
-      color: "rgba(255,255,255,0.8)",
-      textTransform: "uppercase",
-      marginTop: 4,
-      borderBottomWidth: 1,
-      borderBottomColor: divider,
-      paddingBottom: 3,
-      marginBottom: 0,
-    } as const,
-    leftNameSep: {
-      borderBottomWidth: 1,
-      borderBottomColor: divider,
-      marginTop: 3,
-      marginBottom: 8,
-    },
-    leftSection: { marginTop: 14 },
-    leftSectionTitle: {
-      fontSize: 7.5,
-      fontWeight: "bold",
-      color: "#fff",
-      textTransform: "uppercase",
-      borderBottomWidth: 1,
-      borderBottomColor: divider,
-      paddingBottom: 3,
-      marginBottom: 8,
-    },
-    sidebarContactRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 5,
-      marginBottom: 5,
-    },
-    sidebarContactItem: {
-      fontSize: 8,
-      color: "rgba(255,255,255,0.85)",
-      marginTop: -0.5,
-    },
-    skillPillRow: { flexDirection: "row", flexWrap: "wrap" },
-    langRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      marginBottom: 4,
-    },
-    langName: { fontSize: 8.5, fontWeight: "bold", color: "#fff" },
-    langLevel: { fontSize: 8, color: "rgba(255,255,255,0.7)" },
-    interestText: {
-      fontSize: 8,
-      color: "rgba(255,255,255,0.85)",
-      lineHeight: 1.5,
-    },
-    rightSection: { marginTop: 0 },
-    rightSectionTitle: {
-      fontSize: 9.5,
-      fontWeight: "bold",
-      color: accent,
-      textTransform: "uppercase",
-      borderLeftWidth: 3,
-      borderLeftColor: accent,
-      paddingLeft: 8,
-      paddingBottom: 3,
-      marginBottom: 0,
-    },
-    rightDivider: {
-      borderBottomWidth: 1,
-      borderBottomColor: divider,
-      marginBottom: 8,
-    },
-    summaryText: { fontSize: 9, color: GRAY, lineHeight: d.lh },
-    expItem: {},
-    expItemGap: { marginTop: d.itemGap },
-    expRole: { fontSize: 10, fontWeight: "bold" },
-    expMeta: { fontSize: 8.5, color: GRAY, marginTop: 4 },
-    expDesc: { fontSize: 9, color: GRAY, marginTop: 4, lineHeight: d.lh },
-    projLink: { fontSize: 8.5, color: accent, marginTop: 3 },
-    eduItem: {},
-    eduItemGap: { marginTop: d.itemGap },
-    eduDegree: { fontSize: 10, fontWeight: "bold" },
-    eduMeta: { fontSize: 8.5, color: GRAY, marginTop: 3 },
-    certName: { fontSize: 10, fontWeight: "bold" },
-    certMeta: { fontSize: 8.5, color: GRAY, marginTop: 3 },
-  });
-}
-
-function SidebarLayout({ cv, titles }: { cv: CVData; titles: SectionTitles }) {
-  const {
-    personal,
-    experiences,
-    education,
-    skills,
-    languages,
-    template,
-    projects,
-    certifications,
-    interests,
-  } = cv;
-  const { accentColor, dividerColor, hiddenSections, density } = template;
-  const d = DENSITY_CONFIG[density ?? "normal"];
-  const s = sidebarStyles(accentColor, dividerColor ?? LIGHT_GRAY, d);
-  const font = template.font;
-  const isHidden = (key: SectionKey) => hiddenSections?.includes(key);
-
-  return (
-    <Page size="A4" style={[s.page, { fontFamily: font }]}>
-      {/* Left column — always fills full page height via flex stretch */}
-      <View style={s.left}>
-        <View style={s.nameBlock}>
-          <Text style={s.name}>{personal.firstName}</Text>
-          <Text style={s.name}>{personal.lastName}</Text>
-        </View>
-
-        {cv.photo ? <Image src={cv.photo} style={s.photo} /> : null}
-
-        {personal.jobTitle ? (
-          <Text style={s.jobTitle}>{personal.jobTitle}</Text>
-        ) : personal.email ||
-          personal.phone ||
-          personal.city ||
-          personal.country ||
-          personal.linkedin ||
-          personal.github ||
-          personal.portfolio ? (
-          <View style={s.leftNameSep} />
-        ) : null}
-
-        {(personal.email ||
-          personal.phone ||
-          personal.city ||
-          personal.country ||
-          personal.linkedin ||
-          personal.github ||
-          personal.portfolio) && (
-          <View style={s.leftSection}>
-            <Text style={s.leftSectionTitle}>{titles.contact}</Text>
-            {personal.phone ? (
-              <View style={s.sidebarContactRow}>
-                <Icon d={ICON_PATHS.phone} size={7} color="rgba(255,255,255,0.85)" />
-                <Text style={s.sidebarContactItem}>{personal.phone}</Text>
-              </View>
-            ) : null}
-            {personal.email ? (
-              <View style={s.sidebarContactRow}>
-                <Icon d={ICON_PATHS.mail} size={7} color="rgba(255,255,255,0.85)" />
-                <Text style={s.sidebarContactItem}>{personal.email}</Text>
-              </View>
-            ) : null}
-            {(personal.city || personal.country) ? (
-              <View style={s.sidebarContactRow}>
-                <Icon d={ICON_PATHS.home} size={7} color="rgba(255,255,255,0.85)" />
-                <Text style={s.sidebarContactItem}>{[personal.city, personal.country].filter(Boolean).join(", ")}</Text>
-              </View>
-            ) : null}
-            {personal.linkedin ? (
-              <View style={s.sidebarContactRow}>
-                <Icon d={ICON_PATHS.linkedin} size={7} color="rgba(255,255,255,0.85)" />
-                <Text style={s.sidebarContactItem}>{personal.linkedin}</Text>
-              </View>
-            ) : null}
-            {personal.github ? (
-              <View style={s.sidebarContactRow}>
-                <Icon d={ICON_PATHS.github} size={7} color="rgba(255,255,255,0.85)" />
-                <Text style={s.sidebarContactItem}>{personal.github}</Text>
-              </View>
-            ) : null}
-            {personal.portfolio ? (
-              <View style={s.sidebarContactRow}>
-                <Icon d={ICON_PATHS.globe} size={7} color="rgba(255,255,255,0.85)" />
-                <Text style={s.sidebarContactItem}>{personal.portfolio}</Text>
-              </View>
-            ) : null}
-          </View>
-        )}
-
-        {!isHidden("skills") && skills.length > 0 && (
-          <View style={s.leftSection}>
-            <Text style={s.leftSectionTitle}>{titles.skills}</Text>
-            <View style={s.skillPillRow}>
-              {skills.map((skill, i) => (
-                <View
-                  key={i}
-                  style={{
-                    backgroundColor: "rgba(255,255,255,0.2)",
-                    borderRadius: 3,
-                    paddingVertical: 2,
-                    paddingHorizontal: 6,
-                    marginRight: 4,
-                    marginBottom: 4,
-                  }}
-                >
-                  <Text style={{ fontSize: 7.5, color: "#fff" }}>
-                    {skill.name}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {!isHidden("languages") && languages.length > 0 && (
-          <View style={s.leftSection}>
-            <Text style={s.leftSectionTitle}>{titles.languages}</Text>
-            {languages.map((lang) => (
-              <View key={lang.id} style={s.langRow}>
-                <Text style={s.langName}>{lang.name}</Text>
-                {lang.level ? (
-                  <Text style={s.langLevel}>{lang.level}</Text>
-                ) : null}
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Interests — each item as separate Text element to prevent line break hyphens */}
-        {!isHidden("interests") && interests.length > 0 && (
-          <View style={s.leftSection}>
-            <Text style={s.leftSectionTitle}>{titles.interests}</Text>
-            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-              {interests.map((interest, i) => (
-                <Text key={i} style={s.interestText}>
-                  {interest}
-                  {i < interests.length - 1 ? " · " : ""}
-                </Text>
-              ))}
-            </View>
-          </View>
-        )}
-      </View>
-
-      {/* Right column */}
-      <View style={s.right}>
-        {!isHidden("summary") && personal.summary ? (
-          <View style={[s.rightSection, { marginTop: 0 }]}>
-            <Text style={s.rightSectionTitle}>{titles.profile}</Text>
-            <View style={s.rightDivider} />
-            <Text style={s.summaryText}>{personal.summary}</Text>
-          </View>
-        ) : null}
-
-        {!isHidden("experiences") && experiences.length > 0 && (
-          <View style={[s.rightSection, { marginTop: d.sectionGap }]}>
-            <Text style={s.rightSectionTitle}>{titles.experience}</Text>
-            <View style={s.rightDivider} />
-            {experiences.map((exp, i) => {
-              const datePart = [
-                exp.startDate,
-                exp.current ? titles.present : exp.endDate,
-              ]
-                .filter(Boolean)
-                .join(" – ");
-              const meta = [exp.company, datePart]
-                .filter(Boolean)
-                .join("  ·  ");
-              return (
-                <View key={exp.id} style={[s.expItem, i > 0 && s.expItemGap]}>
-                  <Text style={s.expRole}>{exp.role}</Text>
-                  {meta ? <Text style={s.expMeta}>{meta}</Text> : null}
-                  {exp.description ? (
-                    <Text style={s.expDesc}>{exp.description}</Text>
-                  ) : null}
-                </View>
-              );
-            })}
-          </View>
-        )}
-
-        {!isHidden("projects") && projects.length > 0 && (
-          <View style={[s.rightSection, { marginTop: d.sectionGap }]}>
-            <Text style={s.rightSectionTitle}>{titles.projects}</Text>
-            <View style={s.rightDivider} />
-            {projects.map((proj, i) => (
-              <View key={proj.id} style={[s.expItem, i > 0 && s.expItemGap]}>
-                <Text style={s.expRole}>{proj.name}</Text>
-                {proj.year ? <Text style={s.expMeta}>{proj.year}</Text> : null}
-                {proj.description ? (
-                  <Text style={s.expDesc}>{proj.description}</Text>
-                ) : null}
-                {proj.url ? <Text style={s.projLink}>{proj.url}</Text> : null}
-              </View>
-            ))}
-          </View>
-        )}
-
-        {!isHidden("education") && education.length > 0 && (
-          <View style={[s.rightSection, { marginTop: d.sectionGap }]}>
-            <Text style={s.rightSectionTitle}>{titles.education}</Text>
-            <View style={s.rightDivider} />
-            {education.map((edu, i) => (
-              <View key={edu.id} style={[s.eduItem, i > 0 && s.eduItemGap]}>
-                <Text style={s.eduDegree}>
-                  {edu.degree}
-                  {edu.field ? ` — ${edu.field}` : ""}
-                </Text>
-                <Text style={s.eduMeta}>
-                  {edu.school}
-                  {edu.school && edu.year ? "  ·  " : ""}
-                  {edu.year}
-                </Text>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {!isHidden("certifications") && certifications.length > 0 && (
-          <View style={[s.rightSection, { marginTop: d.sectionGap }]}>
-            <Text style={s.rightSectionTitle}>{titles.certifications}</Text>
-            <View style={s.rightDivider} />
-            {certifications.map((cert, i) => (
-              <View key={cert.id} style={[s.eduItem, i > 0 && s.eduItemGap]}>
-                <Text style={s.certName}>{cert.name}</Text>
-                {cert.issuer || cert.year ? (
-                  <Text style={s.certMeta}>
-                    {[cert.issuer, cert.year].filter(Boolean).join("  ·  ")}
-                  </Text>
-                ) : null}
-              </View>
-            ))}
-          </View>
-        )}
       </View>
     </Page>
-  );
+  )
 }
 
-// ─── Main export ──────────────────────────────────────────────────────────────
+// ─── Zone 11: Default Export ───────────────────────────────────────────────────
 
-export default function CVDocument({
-  cv,
-  sectionTitles,
-}: {
-  cv: CVData;
-  sectionTitles: SectionTitles;
-}) {
+interface CVDocumentProps {
+  cv: CVData
+  sectionTitles: Record<string, string>
+}
+
+export default function CVDocument({ cv, sectionTitles }: CVDocumentProps) {
+  const styles = makeStyles(cv.template)
+  const sp = DENSITY_TOKENS[cv.template.density]
+  const layoutProps = { cv, sectionTitles, styles, sp }
+
   return (
     <Document>
-      {cv.template.layout === "sidebar" ? (
-        <SidebarLayout cv={cv} titles={sectionTitles} />
+      {cv.template.layout === 'sidebar' ? (
+        <SidebarLayout {...layoutProps} />
       ) : (
-        <SingleLayout cv={cv} titles={sectionTitles} />
+        <SingleLayout {...layoutProps} />
       )}
     </Document>
-  );
+  )
 }
