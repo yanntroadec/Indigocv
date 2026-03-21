@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #111827;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.indigo-btn {
+  background: rgba(79, 70, 229, 0.2) !important;
+  border: 1px solid rgba(79, 70, 229, 0.35) !important;
+  color: #4f46e5 !important;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.indigo-btn:hover {
+  background: #4f46e5 !important;
+  border-color: #4f46e5 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.35);
+  transform: translateY(-1px);
+}
+
+.indigo-btn:active {
+  transform: scale(0.97);
+}
+
+.magenta-btn {
+  background: rgba(181, 51, 138, 0.18) !important;
+  border: 1px solid rgba(181, 51, 138, 0.35) !important;
+  color: #b5338a !important;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.magenta-btn:hover {
+  background: #b5338a !important;
+  border-color: #b5338a !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px rgba(181, 51, 138, 0.35);
+  transform: translateY(-1px);
+}
+
+.magenta-btn:active {
+  transform: scale(0.97);
+}
+
