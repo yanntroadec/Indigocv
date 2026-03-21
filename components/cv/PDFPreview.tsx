@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useCVStore } from '@/store/cvStore'
 import CVDocument from './CVDocument'
 import type { CVData, SectionKey } from '@/types/cv'
@@ -155,8 +156,9 @@ function FontPicker({ value, onChange }: { value: Template['font']; onChange: (f
   )
 }
 
-export default function PDFPreview() {
-  const { cv, setTemplate } = useCVStore()
+export default function PDFPreview({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
+  const { cv, setTemplate, isSaving, lastSavedAt, saveError, saveCVToSupabase, reset } = useCVStore()
+  const router = useRouter()
   const template = cv.template
   const update = (patch: Partial<Template>) => setTemplate({ ...template, ...patch })
 
@@ -199,6 +201,27 @@ export default function PDFPreview() {
           >
             {({ loading }) => loading ? 'Génération en cours...' : 'Télécharger le PDF'}
           </PDFDownloadLink>
+
+          {isAuthenticated && (
+            <div>
+              <button
+                type="button"
+                onClick={() => saveCVToSupabase()}
+                disabled={isSaving}
+                className="indigo-btn block w-full rounded-xl px-4 py-2 text-center text-sm font-semibold transition disabled:opacity-50"
+              >
+                {isSaving ? 'Sauvegarde…' : 'Sauvegarder'}
+              </button>
+              {lastSavedAt && !saveError && (
+                <p className="text-[10px] text-gray-400 text-center mt-1">
+                  Sauvegardé à {lastSavedAt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              )}
+              {saveError && (
+                <p className="text-[10px] text-red-500 text-center mt-1">{saveError}</p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Scrollable customisation area */}
@@ -322,6 +345,13 @@ export default function PDFPreview() {
           >
             ← Modifier mon CV
           </Link>
+          <button
+            type="button"
+            onClick={() => { reset(); router.push('/create') }}
+            className="magenta-btn block w-full rounded-xl px-4 py-2.5 text-center text-sm font-medium transition"
+          >
+            Créer un nouveau CV
+          </button>
           <Link
             href="/"
             className="indigo-btn block w-full rounded-xl px-4 py-2.5 text-center text-sm font-medium transition"

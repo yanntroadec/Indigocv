@@ -60,3 +60,11 @@ export interface CVData {
   }[]
   interests: string[]
 }
+
+export interface CVRecord {
+  id: string
+  name: string
+  data: CVData
+  created_at: string
+  updated_at: string
+}

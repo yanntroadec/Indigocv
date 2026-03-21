@@ -46,7 +46,7 @@ export default function LandingPage() {
           et téléchargez-le en PDF en un clic.
         </p>
 
-        <p className="text-sm text-gray-400 mt-1 mb-3">Gratuit · Sans inscription</p>
+        <p className="text-sm text-gray-400 mt-1 mb-3">Gratuit · Téléchargement immédiat</p>
         <Link
           href="/create"
           className="magenta-btn rounded-xl px-6 py-3 text-base font-medium"

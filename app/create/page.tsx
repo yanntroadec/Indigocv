@@ -1,11 +1,31 @@
 import type { Metadata } from 'next'
 import FormWizard from '@/components/form/FormWizard'
+import CVLoader from '@/components/CVLoader'
+import { createClient } from '@/lib/supabase/server'
+import type { CVRecord } from '@/types/cv'
 
 export const metadata: Metadata = {
   title: 'Créer mon CV — IndigoCV',
 }
 
-export default function CreatePage() {
+export default async function CreatePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cvId?: string }>
+}) {
+  const { cvId } = await searchParams
+  let initialRecord: CVRecord | null = null
+
+  if (cvId) {
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from('cvs')
+      .select('*')
+      .eq('id', cvId)
+      .single()
+    initialRecord = data ?? null
+  }
+
   return (
     <main
       className="min-h-screen py-10 px-4 pt-28"
@@ -31,6 +51,7 @@ export default function CreatePage() {
         `,
       }}
     >
+      <CVLoader initialRecord={initialRecord} />
       <div className="max-w-xl mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold text-gray-900">Mon CV</h1>
