@@ -1,7 +1,7 @@
 'use client'
 
-import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { Link, usePathname, useRouter } from '@/i18n/navigation'
+import { useLocale, useTranslations } from 'next-intl'
 import { useState, useRef, useEffect } from 'react'
 import { useCVStore } from '@/store/cvStore'
 import { useUser } from '@/components/AuthProvider'
@@ -10,13 +10,16 @@ import { STEPS } from '@/components/form/FormWizard'
 
 
 function StepIndicator() {
+  const t = useTranslations('form')
   const { step, setStep } = useCVStore()
 
   return (
     <>
       {/* Mobile — text only */}
       <div className="flex sm:hidden items-center gap-2">
-        <span className="text-xs font-semibold" style={{ color: '#e11d78' }}>{STEPS[step].short}</span>
+        <span className="text-xs font-semibold" style={{ color: '#e11d78' }}>
+          {t(`steps.${STEPS[step].key}.short`)}
+        </span>
         <span className="text-xs text-gray-400">{step + 1}/{STEPS.length}</span>
       </div>
 
@@ -27,7 +30,7 @@ function StepIndicator() {
             <button
               type="button"
               onClick={() => setStep(i)}
-              title={s.short}
+              title={t(`steps.${s.key}.short`)}
               className="flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold transition-all"
               style={{
                 background: i < step ? '#f0a0b8' : i === step ? '#e11d78' : 'rgba(255,255,255,0.7)',
@@ -51,7 +54,32 @@ function StepIndicator() {
   )
 }
 
+function LocaleSwitcher() {
+  const locale = useLocale()
+  const router = useRouter()
+  const pathname = usePathname()
+
+  const toggle = () => {
+    router.replace(pathname, { locale: locale === 'en' ? 'fr' : 'en' })
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      title={locale === 'en' ? 'Passer en français' : 'Switch to English'}
+      className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-semibold text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition"
+    >
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5a17.92 17.92 0 01-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+      </svg>
+      {locale.toUpperCase()}
+    </button>
+  )
+}
+
 function UserMenu() {
+  const t = useTranslations('header')
   const { user } = useUser()
   const router = useRouter()
   const pathname = usePathname()
@@ -73,7 +101,7 @@ function UserMenu() {
         href="/login"
         className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition"
       >
-        Se connecter
+        {t('login')}
       </Link>
     )
   }
@@ -106,7 +134,7 @@ function UserMenu() {
               onClick={() => setOpen(false)}
               className="block px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
             >
-              Accueil
+              {t('home')}
             </Link>
           )}
           <button
@@ -114,7 +142,7 @@ function UserMenu() {
             onClick={() => { setOpen(false); useCVStore.getState().reset(); router.push('/create') }}
             className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
           >
-            Nouveau CV
+            {t('newCV')}
           </button>
           {pathname !== '/' && (
             <button
@@ -122,7 +150,7 @@ function UserMenu() {
               onClick={() => { setOpen(false); useCVStore.getState().saveCVToSupabase() }}
               className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
             >
-              Sauvegarder
+              {t('save')}
             </button>
           )}
           <div className="border-t border-gray-100" />
@@ -131,14 +159,14 @@ function UserMenu() {
             onClick={() => setOpen(false)}
             className="block px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
           >
-            Mon dashboard
+            {t('dashboard')}
           </Link>
           <button
             type="button"
             onClick={handleLogout}
             className="w-full text-left px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 transition"
           >
-            Se déconnecter
+            {t('logout')}
           </button>
         </div>
       )}
@@ -146,7 +174,8 @@ function UserMenu() {
   )
 }
 
-function NewCVButton({ className = '' }: { className?: string }) {
+function NewCVButton() {
+  const t = useTranslations('header')
   const reset = useCVStore((s) => s.reset)
   const router = useRouter()
 
@@ -159,14 +188,15 @@ function NewCVButton({ className = '' }: { className?: string }) {
     <button
       type="button"
       onClick={handleNewCV}
-      className={`magenta-btn rounded-xl px-4 py-2 text-sm font-semibold transition ${className}`}
+      className="magenta-btn rounded-xl px-4 py-2 text-sm font-semibold transition"
     >
-      Nouveau CV
+      {t('newCV')}
     </button>
   )
 }
 
 export default function Header() {
+  const t = useTranslations('header')
   const pathname = usePathname()
 
   if (pathname === '/preview') return null
@@ -185,8 +215,9 @@ export default function Header() {
         {pathname === '/create' && <StepIndicator />}
       </div>
 
-      {/* Right — desktop: full actions | mobile: user menu only */}
-      <div className="flex items-center gap-3">
+      {/* Right — locale switcher + desktop actions + user menu */}
+      <div className="flex items-center gap-2">
+        <LocaleSwitcher />
         <div className="hidden sm:flex items-center gap-3">
           {pathname === '/create' && (
             <>
@@ -195,7 +226,7 @@ export default function Header() {
                 href="/preview"
                 className="indigo-btn rounded-xl px-4 py-2 text-sm font-semibold transition"
               >
-                Prévisualiser →
+                {t('preview')}
               </Link>
             </>
           )}

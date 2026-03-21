@@ -33,6 +33,7 @@ interface CVStore {
   cv: CVData
   step: number
   currentCvId: string | null
+  currentCvName: string | null
   isSaving: boolean
   lastSavedAt: Date | null
   saveError: string | null
@@ -47,6 +48,7 @@ interface CVStore {
   setCertifications: (certifications: CVData['certifications']) => void
   setInterests: (interests: CVData['interests']) => void
   setStep: (step: number) => void
+  setCvName: (name: string) => void
   reset: () => void
   loadCV: (record: CVRecord) => void
   saveCVToSupabase: (name?: string) => Promise<void>
@@ -58,6 +60,7 @@ export const useCVStore = create<CVStore>()(
       cv: defaultCV,
       step: 0,
       currentCvId: null,
+      currentCvName: null,
       isSaving: false,
       lastSavedAt: null,
       saveError: null,
@@ -72,10 +75,11 @@ export const useCVStore = create<CVStore>()(
       setCertifications: (certifications) => set((s) => ({ cv: { ...s.cv, certifications } })),
       setInterests: (interests) => set((s) => ({ cv: { ...s.cv, interests } })),
       setStep: (step) => set({ step }),
-      reset: () => set({ cv: defaultCV, step: 0, currentCvId: null, isSaving: false, lastSavedAt: null, saveError: null }),
+      setCvName: (name) => set({ currentCvName: name }),
+      reset: () => set({ cv: defaultCV, step: 0, currentCvId: null, currentCvName: null, isSaving: false, lastSavedAt: null, saveError: null }),
 
       loadCV: (record: CVRecord) => {
-        set({ cv: record.data, currentCvId: record.id, step: 0, saveError: null })
+        set({ cv: record.data, currentCvId: record.id, currentCvName: record.name, step: 0, saveError: null })
       },
 
       saveCVToSupabase: async (name?: string) => {
@@ -123,7 +127,7 @@ export const useCVStore = create<CVStore>()(
           }
         }
 
-        const cvName = name ?? `Mon CV`
+        const cvName = name ?? state.currentCvName ?? 'CV'
 
         let error: { message: string } | null = null
 
@@ -146,7 +150,7 @@ export const useCVStore = create<CVStore>()(
 
           error = insertError
           if (!insertError && inserted) {
-            set({ currentCvId: inserted.id })
+            set({ currentCvId: inserted.id, currentCvName: cvName })
           }
         }
 
@@ -168,6 +172,7 @@ export const useCVStore = create<CVStore>()(
         cv: state.cv,
         step: state.step,
         currentCvId: state.currentCvId,
+        currentCvName: state.currentCvName,
       }),
       merge: (persisted, current) => {
         const persistedStore = persisted as Partial<CVStore>

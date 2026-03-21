@@ -2,9 +2,11 @@
 
 import { useState, type KeyboardEvent } from 'react'
 import { useCVStore } from '@/store/cvStore'
+import { useTranslations } from 'next-intl'
 
 export default function InterestsStep() {
   const { cv, setInterests } = useCVStore()
+  const t = useTranslations('form.interests')
   const interests = cv.interests
   const [input, setInput] = useState('')
 
@@ -25,7 +27,7 @@ export default function InterestsStep() {
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Ajouter un centre d&apos;intérêt</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t('label')}</label>
         <div className="flex gap-2">
           <input
             type="text"
@@ -33,10 +35,10 @@ export default function InterestsStep() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="Ex : Photographie, Randonnée, Open Source..."
+            placeholder={t('placeholder')}
           />
           <button type="button" onClick={add} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition">
-            Ajouter
+            {t('addButton')}
           </button>
         </div>
       </div>
@@ -45,13 +47,13 @@ export default function InterestsStep() {
           {interests.map((interest) => (
             <span key={interest} className="inline-flex items-center gap-1.5 rounded-full bg-purple-50 px-3 py-1 text-sm text-purple-700 border border-purple-200">
               {interest}
-              <button type="button" onClick={() => remove(interest)} className="text-purple-400 hover:text-purple-700 leading-none" aria-label={`Supprimer ${interest}`}>×</button>
+              <button type="button" onClick={() => remove(interest)} className="text-purple-400 hover:text-purple-700 leading-none" aria-label={t('removeAriaLabel', { interest })}>×</button>
             </span>
           ))}
         </div>
       )}
       {interests.length === 0 && (
-        <p className="text-sm text-gray-400 text-center py-4">Aucun centre d&apos;intérêt ajouté pour l&apos;instant.</p>
+        <p className="text-sm text-gray-400 text-center py-4">{t('empty')}</p>
       )}
     </div>
   )

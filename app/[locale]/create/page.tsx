@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import FormWizard from '@/components/form/FormWizard'
 import CVLoader from '@/components/CVLoader'
 import { createClient } from '@/lib/supabase/server'
 import type { CVRecord } from '@/types/cv'
 
-export const metadata: Metadata = {
-  title: 'Créer mon CV — IndigoCV',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('form')
+  return { title: `${t('finish').replace(' →', '')} — IndigoCV` }
 }
 
 export default async function CreatePage({
@@ -53,12 +55,6 @@ export default async function CreatePage({
     >
       <CVLoader initialRecord={initialRecord} />
       <div className="max-w-xl mx-auto">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Mon CV</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Remplissez chaque étape, puis prévisualisez votre CV.
-          </p>
-        </div>
         <FormWizard />
       </div>
     </main>

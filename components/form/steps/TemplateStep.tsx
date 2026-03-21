@@ -1,78 +1,82 @@
 'use client'
 
 import { useCVStore } from '@/store/cvStore'
-import type { CVData } from '@/types/cv'
+import { useTranslations } from 'next-intl'
+import type { CVData, SectionKey } from '@/types/cv'
 
 type Template = CVData['template']
 
-const COLOR_PALETTES: { label: string; colors: { label: string; value: string }[] }[] = [
+const COLOR_PALETTES: { key: 'soft' | 'deep' | 'earth' | 'nordic'; colors: { label: string; value: string }[] }[] = [
   {
-    label: 'Doux',
+    key: 'soft',
     colors: [
-      { label: 'Ardoise',     value: '#5c6b7a' },
-      { label: 'Acier',       value: '#5b7fa6' },
-      { label: 'Sauge',       value: '#7a9e7e' },
-      { label: 'Sarcelle',    value: '#4e8c8c' },
-      { label: 'Rose poudré', value: '#b76e79' },
-      { label: 'Corail doux', value: '#c4756a' },
-      { label: 'Lavande',     value: '#9d8cb3' },
-      { label: 'Taupe',       value: '#8b7355' },
+      { label: 'Slate',        value: '#5c6b7a' },
+      { label: 'Steel',        value: '#5b7fa6' },
+      { label: 'Sage',         value: '#7a9e7e' },
+      { label: 'Teal',         value: '#4e8c8c' },
+      { label: 'Dusty Rose',   value: '#b76e79' },
+      { label: 'Soft Coral',   value: '#c4756a' },
+      { label: 'Lavender',     value: '#9d8cb3' },
+      { label: 'Taupe',        value: '#8b7355' },
     ],
   },
   {
-    label: 'Profond',
+    key: 'deep',
     colors: [
-      { label: 'Saphir',      value: '#1e4d8c' },
-      { label: 'Émeraude',    value: '#1a6b4a' },
-      { label: 'Bordeaux',    value: '#722f37' },
-      { label: 'Prune',       value: '#5c2d6e' },
-      { label: 'Pétrole',     value: '#1a5276' },
-      { label: 'Brique',      value: '#8b3a2a' },
-      { label: 'Forêt',       value: '#2d5a27' },
-      { label: 'Anthracite',  value: '#2c3e50' },
+      { label: 'Sapphire',     value: '#1e4d8c' },
+      { label: 'Emerald',      value: '#1a6b4a' },
+      { label: 'Bordeaux',     value: '#722f37' },
+      { label: 'Plum',         value: '#5c2d6e' },
+      { label: 'Petrol',       value: '#1a5276' },
+      { label: 'Brick',        value: '#8b3a2a' },
+      { label: 'Forest',       value: '#2d5a27' },
+      { label: 'Anthracite',   value: '#2c3e50' },
     ],
   },
   {
-    label: 'Terre',
+    key: 'earth',
     colors: [
-      { label: 'Terracotta',  value: '#c4622d' },
-      { label: 'Ocre',        value: '#c8923a' },
-      { label: 'Sable doré',  value: '#b5956a' },
-      { label: 'Cannelle',    value: '#8b5e3c' },
-      { label: 'Moutarde',    value: '#b5952a' },
-      { label: 'Rouille',     value: '#9c4b2a' },
-      { label: 'Bronze',      value: '#8c6d2f' },
-      { label: 'Fauve',       value: '#c07850' },
+      { label: 'Terracotta',   value: '#c4622d' },
+      { label: 'Ochre',        value: '#c8923a' },
+      { label: 'Golden Sand',  value: '#b5956a' },
+      { label: 'Cinnamon',     value: '#8b5e3c' },
+      { label: 'Mustard',      value: '#b5952a' },
+      { label: 'Rust',         value: '#9c4b2a' },
+      { label: 'Bronze',       value: '#8c6d2f' },
+      { label: 'Fawn',         value: '#c07850' },
     ],
   },
   {
-    label: 'Nordique',
+    key: 'nordic',
     colors: [
-      { label: 'Glacier',       value: '#6b9eb2' },
-      { label: 'Brume',         value: '#7a9aaa' },
-      { label: 'Azur',          value: '#4a84b0' },
-      { label: 'Eucalyptus',    value: '#6a9e82' },
-      { label: 'Ardoise bleue', value: '#6a88a0' },
-      { label: 'Écume',         value: '#5a9090' },
-      { label: 'Bruyère',       value: '#7a6fa0' },
-      { label: 'Givre',         value: '#6a8c88' },
+      { label: 'Glacier',      value: '#6b9eb2' },
+      { label: 'Mist',         value: '#7a9aaa' },
+      { label: 'Azure',        value: '#4a84b0' },
+      { label: 'Eucalyptus',   value: '#6a9e82' },
+      { label: 'Slate Blue',   value: '#6a88a0' },
+      { label: 'Sea Foam',     value: '#5a9090' },
+      { label: 'Heather',      value: '#7a6fa0' },
+      { label: 'Frost',        value: '#6a8c88' },
     ],
   },
 ]
 
-const FONTS: { label: string; value: Template['font']; description: string; family: string }[] = [
-  { label: 'Helvetica',        value: 'Helvetica',        description: 'Moderne et épuré',      family: 'Arial, sans-serif' },
-  { label: 'Times',            value: 'Times-Roman',      description: 'Classique et formel',   family: 'Georgia, serif' },
-  { label: 'Roboto',           value: 'Roboto',           description: 'Lisible et neutre',     family: 'Roboto, Arial, sans-serif' },
-  { label: 'Lato',             value: 'Lato',             description: 'Doux et humaniste',     family: 'Lato, Arial, sans-serif' },
-  { label: 'Montserrat',       value: 'Montserrat',       description: 'Géométrique et actuel', family: 'Montserrat, Arial, sans-serif' },
-  { label: 'Raleway',          value: 'Raleway',          description: 'Élégant et aérien',     family: 'Raleway, Arial, sans-serif' },
-  { label: 'Playfair Display', value: 'Playfair Display', description: 'Littéraire et raffiné', family: '"Playfair Display", Georgia, serif' },
-  { label: 'Merriweather',     value: 'Merriweather',     description: 'Chaleureux et sérieux', family: 'Merriweather, Georgia, serif' },
+const FONTS: { label: string; value: Template['font']; family: string }[] = [
+  { label: 'Helvetica',        value: 'Helvetica',        family: 'Arial, sans-serif' },
+  { label: 'Times',            value: 'Times-Roman',      family: 'Georgia, serif' },
+  { label: 'Roboto',           value: 'Roboto',           family: 'Roboto, Arial, sans-serif' },
+  { label: 'Lato',             value: 'Lato',             family: 'Lato, Arial, sans-serif' },
+  { label: 'Montserrat',       value: 'Montserrat',       family: 'Montserrat, Arial, sans-serif' },
+  { label: 'Raleway',          value: 'Raleway',          family: 'Raleway, Arial, sans-serif' },
+  { label: 'Playfair Display', value: 'Playfair Display', family: '"Playfair Display", Georgia, serif' },
+  { label: 'Merriweather',     value: 'Merriweather',     family: 'Merriweather, Georgia, serif' },
 ]
+
+const SECTION_KEYS: SectionKey[] = ['summary', 'experiences', 'projects', 'education', 'certifications', 'skills', 'languages', 'interests']
 
 export default function TemplateStep() {
   const { cv, setTemplate } = useCVStore()
+  const t = useTranslations('form.template')
   const template = cv.template
 
   const update = (patch: Partial<Template>) => setTemplate({ ...template, ...patch })
@@ -82,32 +86,32 @@ export default function TemplateStep() {
 
       {/* Layout */}
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-3">Mise en page</p>
+        <p className="text-sm font-semibold text-gray-700 mb-3">{t('layout')}</p>
         <div className="grid grid-cols-2 gap-3">
           <LayoutCard
             selected={template.layout === 'single'}
             onClick={() => update({ layout: 'single' })}
-            label="Une colonne"
-            badge="ATS-friendly"
+            label={t('singleColumn')}
+            badge={t('atsFriendly')}
             preview={<SinglePreview color={template.accentColor} />}
           />
           <LayoutCard
             selected={template.layout === 'sidebar'}
             onClick={() => update({ layout: 'sidebar' })}
-            label="Deux colonnes"
-            badge="Design moderne"
+            label={t('twoColumns')}
+            badge={t('modernDesign')}
             preview={<SidebarPreview color={template.accentColor} />}
           />
         </div>
       </div>
 
-      {/* Accent color — grouped palettes */}
+      {/* Accent color */}
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-3">Couleur d'accentuation</p>
+        <p className="text-sm font-semibold text-gray-700 mb-3">{t('accentColor')}</p>
         <div className="space-y-3">
           {COLOR_PALETTES.map((palette) => (
-            <div key={palette.label}>
-              <p className="text-xs text-gray-400 mb-1.5">{palette.label}</p>
+            <div key={palette.key}>
+              <p className="text-xs text-gray-400 mb-1.5">{t(`palettes.${palette.key}`)}</p>
               <div className="flex flex-wrap gap-2">
                 {palette.colors.map((c) => (
                   <button
@@ -131,7 +135,7 @@ export default function TemplateStep() {
 
       {/* Font */}
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-3">Police</p>
+        <p className="text-sm font-semibold text-gray-700 mb-3">{t('font')}</p>
         <div className="grid grid-cols-2 gap-2">
           {FONTS.map((f) => (
             <button
@@ -139,22 +143,19 @@ export default function TemplateStep() {
               type="button"
               onClick={() => update({ font: f.value })}
               className={`rounded-xl border-2 px-3 py-2.5 text-left transition ${
-                template.font === f.value
-                  ? 'border-indigo-500 bg-indigo-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                template.font === f.value ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'
               }`}
             >
               <p className="text-sm font-bold text-gray-800" style={{ fontFamily: f.family }}>{f.label}</p>
-              <p className="text-[10px] text-gray-400 mt-0.5">{f.description}</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">{t(`fonts.${f.value}`)}</p>
             </button>
           ))}
         </div>
       </div>
 
-
       {/* Max pages */}
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-3">Nombre de pages maximum</p>
+        <p className="text-sm font-semibold text-gray-700 mb-3">{t('maxPages')}</p>
         <div className="flex gap-3">
           {([1, 2] as const).map((n) => (
             <button
@@ -167,7 +168,7 @@ export default function TemplateStep() {
                   : 'border-gray-200 text-gray-600 hover:border-gray-300'
               }`}
             >
-              {n} page{n > 1 ? 's' : ''}
+              {n} {t('pages')}
             </button>
           ))}
         </div>
@@ -175,24 +176,20 @@ export default function TemplateStep() {
 
       {/* Density */}
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-3">Densité du contenu</p>
+        <p className="text-sm font-semibold text-gray-700 mb-3">{t('density')}</p>
         <div className="flex gap-3">
-          {([
-            { value: 'compact', label: 'Compact' },
-            { value: 'normal',  label: 'Normal' },
-            { value: 'airy',    label: 'Aéré' },
-          ] as const).map((opt) => (
+          {(['compact', 'normal', 'airy'] as const).map((val) => (
             <button
-              key={opt.value}
+              key={val}
               type="button"
-              onClick={() => update({ density: opt.value })}
+              onClick={() => update({ density: val })}
               className={`flex-1 rounded-xl border-2 py-3 text-sm font-medium transition ${
-                template.density === opt.value
+                template.density === val
                   ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
                   : 'border-gray-200 text-gray-600 hover:border-gray-300'
               }`}
             >
-              {opt.label}
+              {t(val)}
             </button>
           ))}
         </div>
@@ -200,37 +197,26 @@ export default function TemplateStep() {
 
       {/* Section visibility */}
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-1">Sections visibles</p>
-        <p className="text-xs text-gray-400 mb-3">Désactivez les sections que vous ne souhaitez pas afficher.</p>
+        <p className="text-sm font-semibold text-gray-700 mb-1">{t('visibleSections')}</p>
+        <p className="text-xs text-gray-400 mb-3">{t('sectionsHint')}</p>
         <div className="flex flex-wrap gap-2">
-          {([
-            { key: 'summary',        label: 'Profil' },
-            { key: 'experiences',   label: 'Expériences' },
-            { key: 'projects',      label: 'Projets' },
-            { key: 'education',     label: 'Formation' },
-            { key: 'certifications',label: 'Certifications' },
-            { key: 'skills',        label: 'Compétences' },
-            { key: 'languages',     label: 'Langues' },
-            { key: 'interests',     label: 'Centres d\'intérêt' },
-          ] as const).map((sec) => {
-            const isHidden = template.hiddenSections.includes(sec.key)
+          {SECTION_KEYS.map((key) => {
+            const isHidden = template.hiddenSections.includes(key)
             return (
               <button
-                key={sec.key}
+                key={key}
                 type="button"
                 onClick={() => {
                   const next = isHidden
-                    ? template.hiddenSections.filter((k) => k !== sec.key)
-                    : [...template.hiddenSections, sec.key]
+                    ? template.hiddenSections.filter((k) => k !== key)
+                    : [...template.hiddenSections, key]
                   update({ hiddenSections: next })
                 }}
                 className={`rounded-full px-3 py-1 text-xs font-medium border transition ${
-                  isHidden
-                    ? 'border-gray-200 text-gray-400 bg-white'
-                    : 'border-indigo-300 text-indigo-600 bg-indigo-50'
+                  isHidden ? 'border-gray-200 text-gray-400 bg-white' : 'border-indigo-300 text-indigo-600 bg-indigo-50'
                 }`}
               >
-                {isHidden ? '○' : '●'} {sec.label}
+                {isHidden ? '○' : '●'} {t(`sections.${key}`)}
               </button>
             )
           })}

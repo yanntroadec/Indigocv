@@ -38,6 +38,19 @@ const DENSITY_CONFIG = {
   airy:    { vPad: 46, hPad: 52, sectionMb: 18, itemMb: 14, lh: 1.7 },
 }
 
+export interface SectionTitles {
+  profile: string
+  experience: string
+  projects: string
+  education: string
+  certifications: string
+  skills: string
+  languages: string
+  interests: string
+  contact: string
+  present: string
+}
+
 // ─── Single-column layout ────────────────────────────────────────────────────
 
 function singleStyles(accent: string, d: typeof DENSITY_CONFIG['normal']) {
@@ -76,7 +89,7 @@ function singleStyles(accent: string, d: typeof DENSITY_CONFIG['normal']) {
   })
 }
 
-function SingleLayout({ cv }: { cv: CVData }) {
+function SingleLayout({ cv, titles }: { cv: CVData; titles: SectionTitles }) {
   const { personal, experiences, education, skills, languages, template, projects, certifications, interests } = cv
   const { accentColor, hiddenSections, density } = template
   const d = DENSITY_CONFIG[density ?? 'normal']
@@ -125,7 +138,7 @@ function SingleLayout({ cv }: { cv: CVData }) {
 
       {!isHidden('summary') && personal.summary ? (
         <View style={s.section}>
-          <Text style={s.sectionTitle}>Profil</Text>
+          <Text style={s.sectionTitle}>{titles.profile}</Text>
           <View style={s.divider} />
           <Text style={s.summaryText}>{personal.summary}</Text>
         </View>
@@ -133,13 +146,13 @@ function SingleLayout({ cv }: { cv: CVData }) {
 
       {!isHidden('experiences') && experiences.length > 0 && (
         <View style={s.section}>
-          <Text style={s.sectionTitle}>Expériences professionnelles</Text>
+          <Text style={s.sectionTitle}>{titles.experience}</Text>
           <View style={s.divider} />
           {experiences.map((exp) => (
             <View key={exp.id} style={s.expItem}>
               <View style={s.expHeader}>
                 <Text style={s.expRole}>{exp.role}</Text>
-                <Text style={s.expMeta}>{exp.company}{exp.company && exp.startDate ? '  ·  ' : ''}{exp.startDate}{exp.startDate && (exp.current || exp.endDate) ? ' – ' : ''}{exp.current ? 'Présent' : exp.endDate}</Text>
+                <Text style={s.expMeta}>{exp.company}{exp.company && exp.startDate ? '  ·  ' : ''}{exp.startDate}{exp.startDate && (exp.current || exp.endDate) ? ' – ' : ''}{exp.current ? titles.present : exp.endDate}</Text>
               </View>
               {exp.description ? <Text style={s.expDesc}>{exp.description}</Text> : null}
             </View>
@@ -149,7 +162,7 @@ function SingleLayout({ cv }: { cv: CVData }) {
 
       {!isHidden('projects') && projects.length > 0 && (
         <View style={s.section}>
-          <Text style={s.sectionTitle}>Projets</Text>
+          <Text style={s.sectionTitle}>{titles.projects}</Text>
           <View style={s.divider} />
           {projects.map((proj) => (
             <View key={proj.id} style={s.expItem}>
@@ -166,7 +179,7 @@ function SingleLayout({ cv }: { cv: CVData }) {
 
       {!isHidden('education') && education.length > 0 && (
         <View style={s.section}>
-          <Text style={s.sectionTitle}>Formation</Text>
+          <Text style={s.sectionTitle}>{titles.education}</Text>
           <View style={s.divider} />
           {education.map((edu) => (
             <View key={edu.id} style={s.eduItem}>
@@ -182,7 +195,7 @@ function SingleLayout({ cv }: { cv: CVData }) {
 
       {!isHidden('certifications') && certifications.length > 0 && (
         <View style={s.section}>
-          <Text style={s.sectionTitle}>Certifications</Text>
+          <Text style={s.sectionTitle}>{titles.certifications}</Text>
           <View style={s.divider} />
           {certifications.map((cert) => (
             <View key={cert.id} style={s.eduItem}>
@@ -198,7 +211,7 @@ function SingleLayout({ cv }: { cv: CVData }) {
 
       {!isHidden('skills') && skills.length > 0 && (
         <View style={s.section}>
-          <Text style={s.sectionTitle}>Compétences</Text>
+          <Text style={s.sectionTitle}>{titles.skills}</Text>
           <View style={s.divider} />
           <View style={s.skillsGrid}>
             {skills.map((skill, i) => (
@@ -219,7 +232,7 @@ function SingleLayout({ cv }: { cv: CVData }) {
 
       {!isHidden('languages') && languages.length > 0 && (
         <View style={s.section}>
-          <Text style={s.sectionTitle}>Langues</Text>
+          <Text style={s.sectionTitle}>{titles.languages}</Text>
           <View style={s.divider} />
           <View style={s.langRow}>
             {languages.map((lang) => (
@@ -234,7 +247,7 @@ function SingleLayout({ cv }: { cv: CVData }) {
 
       {!isHidden('interests') && interests.length > 0 && (
         <View style={s.section}>
-          <Text style={s.sectionTitle}>{"Centres d'intérêt"}</Text>
+          <Text style={s.sectionTitle}>{titles.interests}</Text>
           <View style={s.divider} />
           <View style={s.interestRow}>
             {interests.map((interest, i) => (
@@ -281,7 +294,7 @@ function sidebarStyles(accent: string, d: typeof DENSITY_CONFIG['normal']) {
   })
 }
 
-function SidebarLayout({ cv }: { cv: CVData }) {
+function SidebarLayout({ cv, titles }: { cv: CVData; titles: SectionTitles }) {
   const { personal, experiences, education, skills, languages, template, projects, certifications, interests } = cv
   const { accentColor, hiddenSections, density } = template
   const d = DENSITY_CONFIG[density ?? 'normal']
@@ -300,7 +313,7 @@ function SidebarLayout({ cv }: { cv: CVData }) {
         </View>
         {(personal.email || personal.phone || personal.street || personal.city || personal.country || personal.linkedin || personal.github || personal.portfolio) && (
           <View style={s.leftSection}>
-            <Text style={s.leftSectionTitle}>Contact</Text>
+            <Text style={s.leftSectionTitle}>{titles.contact}</Text>
             {personal.email ? <Text style={s.contactItem}>{personal.email}</Text> : null}
             {personal.phone ? <Text style={s.contactItem}>{personal.phone}</Text> : null}
             {personal.street ? <Text style={s.contactItem}>{personal.street}</Text> : null}
@@ -313,7 +326,7 @@ function SidebarLayout({ cv }: { cv: CVData }) {
         )}
         {!isHidden('skills') && skills.length > 0 && (
           <View style={s.leftSection}>
-            <Text style={s.leftSectionTitle}>Compétences</Text>
+            <Text style={s.leftSectionTitle}>{titles.skills}</Text>
             {skills.map((skill, i) => (
               <View key={i} style={s.skillRow}>
                 <Text style={s.skillName}>{skill.name}</Text>
@@ -330,7 +343,7 @@ function SidebarLayout({ cv }: { cv: CVData }) {
         )}
         {!isHidden('languages') && languages.length > 0 && (
           <View style={s.leftSection}>
-            <Text style={s.leftSectionTitle}>Langues</Text>
+            <Text style={s.leftSectionTitle}>{titles.languages}</Text>
             {languages.map((lang) => (
               <View key={lang.id} style={s.langRow}>
                 <Text style={s.langName}>{lang.name}</Text>
@@ -341,7 +354,7 @@ function SidebarLayout({ cv }: { cv: CVData }) {
         )}
         {!isHidden('interests') && interests.length > 0 && (
           <View style={s.leftSection}>
-            <Text style={s.leftSectionTitle}>{"Centres d'intérêt"}</Text>
+            <Text style={s.leftSectionTitle}>{titles.interests}</Text>
             <Text style={s.interestText}>{interests.join('  ·  ')}</Text>
           </View>
         )}
@@ -351,17 +364,17 @@ function SidebarLayout({ cv }: { cv: CVData }) {
       <View style={s.right}>
         {!isHidden('summary') && personal.summary ? (
           <View>
-            <Text style={s.rightSectionTitle}>Profil</Text>
+            <Text style={s.rightSectionTitle}>{titles.profile}</Text>
             <Text style={s.summaryText}>{personal.summary}</Text>
           </View>
         ) : null}
         {!isHidden('experiences') && experiences.length > 0 && (
           <View>
-            <Text style={s.rightSectionTitle}>Expériences professionnelles</Text>
+            <Text style={s.rightSectionTitle}>{titles.experience}</Text>
             {experiences.map((exp) => (
               <View key={exp.id} style={s.expItem}>
                 <Text style={s.expRole}>{exp.role}</Text>
-                <Text style={s.expMeta}>{exp.company}{exp.company && exp.startDate ? '  ·  ' : ''}{exp.startDate}{exp.startDate && (exp.current || exp.endDate) ? ' – ' : ''}{exp.current ? 'Présent' : exp.endDate}</Text>
+                <Text style={s.expMeta}>{exp.company}{exp.company && exp.startDate ? '  ·  ' : ''}{exp.startDate}{exp.startDate && (exp.current || exp.endDate) ? ' – ' : ''}{exp.current ? titles.present : exp.endDate}</Text>
                 {exp.description ? <Text style={s.expDesc}>{exp.description}</Text> : null}
               </View>
             ))}
@@ -369,7 +382,7 @@ function SidebarLayout({ cv }: { cv: CVData }) {
         )}
         {!isHidden('projects') && projects.length > 0 && (
           <View>
-            <Text style={s.rightSectionTitle}>Projets</Text>
+            <Text style={s.rightSectionTitle}>{titles.projects}</Text>
             {projects.map((proj) => (
               <View key={proj.id} style={s.expItem}>
                 <Text style={s.expRole}>{proj.name}</Text>
@@ -382,7 +395,7 @@ function SidebarLayout({ cv }: { cv: CVData }) {
         )}
         {!isHidden('education') && education.length > 0 && (
           <View>
-            <Text style={s.rightSectionTitle}>Formation</Text>
+            <Text style={s.rightSectionTitle}>{titles.education}</Text>
             {education.map((edu) => (
               <View key={edu.id} style={{ marginBottom: d.itemMb - 2 }}>
                 <Text style={s.eduDegree}>{edu.degree}{edu.field ? ` — ${edu.field}` : ''}</Text>
@@ -393,7 +406,7 @@ function SidebarLayout({ cv }: { cv: CVData }) {
         )}
         {!isHidden('certifications') && certifications.length > 0 && (
           <View>
-            <Text style={s.rightSectionTitle}>Certifications</Text>
+            <Text style={s.rightSectionTitle}>{titles.certifications}</Text>
             {certifications.map((cert) => (
               <View key={cert.id} style={{ marginBottom: d.itemMb - 2 }}>
                 <Text style={s.eduDegree}>{cert.name}</Text>
@@ -409,12 +422,12 @@ function SidebarLayout({ cv }: { cv: CVData }) {
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 
-export default function CVDocument({ cv }: { cv: CVData }) {
+export default function CVDocument({ cv, sectionTitles }: { cv: CVData; sectionTitles: SectionTitles }) {
   return (
     <Document>
       {cv.template.layout === 'sidebar'
-        ? <SidebarLayout cv={cv} />
-        : <SingleLayout cv={cv} />
+        ? <SidebarLayout cv={cv} titles={sectionTitles} />
+        : <SingleLayout cv={cv} titles={sectionTitles} />
       }
     </Document>
   )

@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { useCVStore } from '@/store/cvStore'
+import { useTranslations } from 'next-intl'
 import CVDocument from '@/components/cv/CVDocument'
 
 const PDFDownloadLink = dynamic(
@@ -11,9 +12,24 @@ const PDFDownloadLink = dynamic(
 
 export default function HeaderDownloadButton() {
   const { cv } = useCVStore()
+  const tCv = useTranslations('cv')
+  const tPreview = useTranslations('preview')
+
+  const sectionTitles = {
+    profile: tCv('profile'),
+    experience: tCv('experience'),
+    projects: tCv('projects'),
+    education: tCv('education'),
+    certifications: tCv('certifications'),
+    skills: tCv('skills'),
+    languages: tCv('languages'),
+    interests: tCv('interests'),
+    contact: tCv('contact'),
+    present: tCv('present'),
+  }
 
   return (
-    <PDFDownloadLink document={<CVDocument cv={cv} />} fileName="mon-cv.pdf">
+    <PDFDownloadLink document={<CVDocument cv={cv} sectionTitles={sectionTitles} />} fileName="cv.pdf">
       {({ loading }) => (
         <span
           className="rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition"
@@ -22,7 +38,7 @@ export default function HeaderDownloadButton() {
             opacity: loading ? 0.7 : 1,
           }}
         >
-          {loading ? 'Génération…' : '↓ Télécharger'}
+          {loading ? '…' : tPreview('download')}
         </span>
       )}
     </PDFDownloadLink>

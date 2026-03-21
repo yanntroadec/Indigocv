@@ -1,11 +1,16 @@
+'use client'
+
+import { usePathname } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
+
 export default function Footer() {
+  const pathname = usePathname()
+  const t = useTranslations('footer')
+
+  if (pathname === '/preview') return null
+
   return (
     <footer style={{
-      position: 'fixed',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      zIndex: 40,
       background: 'rgba(255, 255, 255, 0.6)',
       backdropFilter: 'blur(12px)',
       WebkitBackdropFilter: 'blur(12px)',
@@ -15,7 +20,9 @@ export default function Footer() {
       alignItems: 'center',
       justifyContent: 'center',
     }}>
-      <p style={{ fontSize: '11px', color: '#9ca3af' }}>© {new Date().getFullYear()} IndigoCV</p>
+      <p style={{ fontSize: '11px', color: '#9ca3af' }}>
+        {t('copyright', { year: new Date().getFullYear() })}
+      </p>
     </footer>
   )
 }

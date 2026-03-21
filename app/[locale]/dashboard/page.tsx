@@ -1,17 +1,22 @@
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
+import { redirect } from '@/i18n/navigation'
 import { createClient } from '@/lib/supabase/server'
 import CVList from '@/components/dashboard/CVList'
+import { getLocale } from 'next-intl/server'
 
-export const metadata: Metadata = {
-  title: 'Mon dashboard — IndigoCV',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('dashboard')
+  return { title: `${t('title')} — IndigoCV` }
 }
 
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const locale = await getLocale()
 
-  if (!user) redirect('/login')
+  if (!user) redirect({ href: '/login', locale })
+  const userEmail = user!.email
 
   const { data: rawCvs } = await supabase
     .from('cvs')
@@ -24,6 +29,8 @@ export default async function DashboardPage() {
     updated_at: string
     personal?: { firstName?: string; lastName?: string; jobTitle?: string } | null
   }[]
+
+  const t = await getTranslations('dashboard')
 
   return (
     <main
@@ -52,8 +59,8 @@ export default async function DashboardPage() {
     >
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Mes CVs</h1>
-          <p className="text-sm text-gray-500 mt-1">{user.email}</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+          <p className="text-sm text-gray-500 mt-1">{userEmail}</p>
         </div>
         <CVList initialCvs={cvs} />
       </div>

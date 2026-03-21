@@ -1,6 +1,7 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { useRouter } from '@/i18n/navigation'
 import { useCVStore } from '@/store/cvStore'
 import TemplateStep from './steps/TemplateStep'
 import PhotoStep from './steps/PhotoStep'
@@ -14,19 +15,20 @@ import CertificationsStep from './steps/CertificationsStep'
 import InterestsStep from './steps/InterestsStep'
 
 export const STEPS = [
-  { label: 'Template',                  short: 'Template',        component: TemplateStep },
-  { label: 'Photo de profil',           short: 'Photo',           component: PhotoStep },
-  { label: 'Informations personnelles', short: 'Infos',           component: PersonalStep },
-  { label: 'Expériences',               short: 'Expériences',     component: ExperienceStep },
-  { label: 'Projets',                   short: 'Projets',         component: ProjectsStep },
-  { label: 'Formation',                 short: 'Formation',       component: EducationStep },
-  { label: 'Certifications',            short: 'Certifs',         component: CertificationsStep },
-  { label: 'Compétences',               short: 'Compétences',     component: SkillsStep },
-  { label: 'Langues',                   short: 'Langues',         component: LanguagesStep },
-  { label: 'Centres d\'intérêt',        short: 'Intérêts',        component: InterestsStep },
+  { key: 'template' as const,       component: TemplateStep },
+  { key: 'photo' as const,          component: PhotoStep },
+  { key: 'personal' as const,       component: PersonalStep },
+  { key: 'experience' as const,     component: ExperienceStep },
+  { key: 'projects' as const,       component: ProjectsStep },
+  { key: 'education' as const,      component: EducationStep },
+  { key: 'certifications' as const, component: CertificationsStep },
+  { key: 'skills' as const,         component: SkillsStep },
+  { key: 'languages' as const,      component: LanguagesStep },
+  { key: 'interests' as const,      component: InterestsStep },
 ]
 
 export default function FormWizard() {
+  const t = useTranslations('form')
   const router = useRouter()
   const { step, setStep } = useCVStore()
 
@@ -49,7 +51,9 @@ export default function FormWizard() {
   return (
     <div className="w-full max-w-xl mx-auto">
       <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-sm border border-white/80 p-6 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-5">{STEPS[step].label}</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-5">
+          {t(`steps.${STEPS[step].key}.label`)}
+        </h2>
         <StepComponent />
       </div>
 
@@ -60,7 +64,7 @@ export default function FormWizard() {
             onClick={goPrev}
             className="flex-1 rounded-xl border border-gray-300 bg-white/60 py-3 text-sm font-medium text-gray-700 hover:bg-white/90 transition"
           >
-            ← Précédent
+            {t('prev')}
           </button>
         )}
         <button
@@ -69,7 +73,7 @@ export default function FormWizard() {
           className="flex-1 rounded-xl py-3 text-sm font-medium text-white transition hover:opacity-90"
           style={{ background: '#4f46e5' }}
         >
-          {isLast ? 'Aperçu de mon CV →' : 'Suivant →'}
+          {isLast ? t('finish') : t('next')}
         </button>
       </div>
     </div>

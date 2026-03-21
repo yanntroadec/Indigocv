@@ -2,9 +2,11 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 
 export default function LoginPage() {
+  const t = useTranslations('login')
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -64,35 +66,32 @@ export default function LoginPage() {
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/80 shadow-sm p-6 sm:p-8">
           <div className="text-center mb-6">
             <Link href="/" className="text-base font-bold tracking-tight" style={{ color: '#4f46e5' }}>
-              indigo cv
+              IndigoCV
             </Link>
-            <h1 className="text-xl font-semibold text-gray-900 mt-3">Se connecter</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Reçois un lien magique par email pour accéder à ton espace.
-            </p>
+            <h1 className="text-xl font-semibold text-gray-900 mt-3">{t('title')}</h1>
+            <p className="text-sm text-gray-500 mt-1">{t('subtitle')}</p>
           </div>
 
           {submitted ? (
             <div className="text-center space-y-3">
-              <div className="text-4xl">📬</div>
-              <p className="text-sm font-medium text-gray-800">Vérifie ta boîte mail !</p>
+              <div className="text-4xl">{t('successEmoji')}</div>
+              <p className="text-sm font-medium text-gray-800">{t('successTitle')}</p>
               <p className="text-xs text-gray-500">
-                Un lien de connexion a été envoyé à <strong>{email}</strong>.
-                Clique dessus pour accéder à ton espace.
+                {t('successMessage', { email })}
               </p>
               <button
                 type="button"
                 onClick={() => { setSubmitted(false); setEmail('') }}
                 className="text-xs text-indigo-600 hover:underline mt-2"
               >
-                Utiliser une autre adresse
+                {t('changeEmail')}
               </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Adresse email
+                  {t('emailLabel')}
                 </label>
                 <input
                   id="email"
@@ -100,7 +99,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="toi@exemple.com"
+                  placeholder={t('emailPlaceholder')}
                   className="w-full rounded-xl border-2 border-gray-200 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-400 transition"
                 />
               </div>
@@ -114,14 +113,14 @@ export default function LoginPage() {
                 disabled={loading}
                 className="indigo-btn w-full rounded-xl px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50"
               >
-                {loading ? 'Envoi en cours…' : 'Recevoir un lien de connexion'}
+                {loading ? t('submitting') : t('submit')}
               </button>
             </form>
           )}
         </div>
 
         <p className="text-center text-xs text-gray-500 mt-4">
-          <Link href="/" className="hover:underline">← Retour à l'accueil</Link>
+          <Link href="/" className="hover:underline">{t('backHome')}</Link>
         </p>
       </div>
     </main>
