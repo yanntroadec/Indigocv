@@ -1,12 +1,11 @@
 'use client'
 
 import { useCVStore } from '@/store/cvStore'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import type { CVData } from '@/types/cv'
+import { LANGUAGE_LEVELS } from '@/lib/constants'
 
 type Language = CVData['languages'][number]
-
-const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'Native']
 
 function emptyLang(): Language {
   return { id: crypto.randomUUID(), name: '', level: '' }
@@ -15,7 +14,9 @@ function emptyLang(): Language {
 export default function LanguagesStep() {
   const { cv, setLanguages } = useCVStore()
   const t = useTranslations('form.languages')
+  const locale = useLocale()
   const languages = cv.languages
+  const levelOptions = LANGUAGE_LEVELS[locale as keyof typeof LANGUAGE_LEVELS] || LANGUAGE_LEVELS.en
 
   const add = () => setLanguages([...languages, emptyLang()])
   const remove = (id: string) => setLanguages(languages.filter((l) => l.id !== id))
@@ -30,37 +31,37 @@ export default function LanguagesStep() {
       )}
 
       {languages.map((lang) => (
-        <div key={lang.id} className="flex gap-3 items-end">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('label')}</label>
-            <input
-              type="text"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-              value={lang.name}
-              onChange={(e) => update(lang.id, 'name', e.target.value)}
-              placeholder={t('labelPlaceholder')}
-            />
-          </div>
+          <div key={lang.id} className="flex gap-3 items-end">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('label')}</label>
+              <input
+                type="text"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition h-10"
+                value={lang.name}
+                onChange={(e) => update(lang.id, 'name', e.target.value)}
+                placeholder={t('labelPlaceholder')}
+              />
+            </div>
 
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('level')}</label>
-            <input
-              type="text"
-              list={`levels-${lang.id}`}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition bg-white"
-              value={lang.level}
-              onChange={(e) => update(lang.id, 'level', e.target.value)}
-              placeholder={t('levelPlaceholder')}
-            />
-            <datalist id={`levels-${lang.id}`}>
-              {LEVELS.map((level) => <option key={level} value={level} />)}
-            </datalist>
-          </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('level')}</label>
+              <select
+                value={lang.level}
+                onChange={(e) => update(lang.id, 'level', e.target.value)}
+                className="w-full appearance-none border border-gray-300 bg-white px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition h-10"
+                style={{ borderRadius: '0.5rem', color: lang.level ? '#111827' : '#9ca3af', backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 24 24' stroke='%239ca3af' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '1rem' }}
+              >
+                <option value="">{t('levelPlaceholder')}</option>
+                {levelOptions.map((level) => (
+                  <option key={level} value={level}>{level}</option>
+                ))}
+              </select>
+            </div>
 
-          <button type="button" onClick={() => remove(lang.id)} className="pb-2 text-sm text-red-500 hover:text-red-700 transition whitespace-nowrap">
-            {t('remove')}
-          </button>
-        </div>
+            <button type="button" onClick={() => remove(lang.id)} className="pb-2 text-sm text-red-500 hover:text-red-700 transition whitespace-nowrap">
+              {t('remove')}
+            </button>
+          </div>
       ))}
 
       <button

@@ -70,12 +70,8 @@
       "emailPlaceholder": "email@exemple.com",
       "phone": "Téléphone",
       "phonePlaceholder": "Numéro de téléphone",
-      "street": "Rue et numéro",
-      "streetPlaceholder": "Adresse",
       "city": "Ville",
       "cityPlaceholder": "Ville",
-      "postalCode": "Code postal",
-      "postalCodePlaceholder": "Code postal",
       "country": "Pays",
       "countryPlaceholder": "Pays",
       "onlinePresence": "Présence en ligne",
@@ -86,7 +82,8 @@
       "portfolio": "Portfolio / Site web",
       "portfolioPlaceholder": "votresite.com",
       "summary": "Résumé / Profil",
-      "summaryPlaceholder": "Résumé professionnel..."
+      "summaryPlaceholder": "Résumé professionnel...",
+      "invalidEmail": "Email invalide"
     },
     "experience": {
       "empty": "Aucune expérience ajoutée. Cliquez sur le bouton ci-dessous pour en ajouter une.",
@@ -103,7 +100,9 @@
       "description": "Description",
       "descriptionPlaceholder": "Missions et réalisations...",
       "add": "+ Ajouter une expérience",
-      "remove": "Supprimer"
+      "remove": "Supprimer",
+      "monthPlaceholder": "Mois",
+      "yearPlaceholder": "Année"
     },
     "projects": {
       "empty": "Aucun projet ajouté pour l'instant.",
@@ -112,6 +111,7 @@
       "namePlaceholder": "Nom du projet",
       "year": "Année",
       "yearPlaceholder": "Année",
+      "yearSelectPlaceholder": "Année",
       "url": "Lien (optionnel)",
       "urlPlaceholder": "url-du-projet.com",
       "description": "Description",
@@ -130,6 +130,7 @@
       "fieldPlaceholder": "Domaine d'études",
       "year": "Année d'obtention",
       "yearPlaceholder": "Année d'obtention",
+      "yearSelectPlaceholder": "Sélectionner une année",
       "add": "+ Ajouter une formation",
       "remove": "Supprimer"
     },
@@ -142,6 +143,7 @@
       "issuerPlaceholder": "Organisme",
       "year": "Année",
       "yearPlaceholder": "Année",
+      "yearSelectPlaceholder": "Année",
       "add": "+ Ajouter une certification",
       "remove": "Supprimer"
     },

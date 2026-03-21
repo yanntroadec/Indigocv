@@ -1,10 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface CVCardProps {
-  id: string
   name: string
   updatedAt: string
   personal?: { firstName?: string; lastName?: string; jobTitle?: string } | null
@@ -13,8 +12,9 @@ interface CVCardProps {
   onRename: (newName: string) => void
 }
 
-export default function CVCard({ id: _id, name, updatedAt, personal, onOpen, onDelete, onRename }: CVCardProps) {
+export default function CVCard({ name, updatedAt, personal, onOpen, onDelete, onRename }: CVCardProps) {
   const t = useTranslations('dashboard')
+  const locale = useLocale()
   const [editing, setEditing] = useState(false)
   const [editValue, setEditValue] = useState(name)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -30,7 +30,7 @@ export default function CVCard({ id: _id, name, updatedAt, personal, onOpen, onD
     ? `${personal.firstName ?? ''} ${personal.lastName ?? ''}`.trim()
     : null
 
-  const date = new Date(updatedAt).toLocaleDateString(undefined, {
+  const date = new Date(updatedAt).toLocaleDateString(locale, {
     day: 'numeric', month: 'short', year: 'numeric',
   })
 
@@ -70,6 +70,7 @@ export default function CVCard({ id: _id, name, updatedAt, personal, onOpen, onD
           type="button"
           onClick={() => { setEditing(true); setEditValue(name) }}
           className="rounded-lg p-1.5 text-gray-400 hover:text-indigo-500 hover:bg-indigo-50 transition"
+          aria-label={t('rename')}
           title={t('rename')}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -99,6 +100,7 @@ export default function CVCard({ id: _id, name, updatedAt, personal, onOpen, onD
             type="button"
             onClick={() => setConfirmDelete(true)}
             className="rounded-lg p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 transition"
+            aria-label={t('delete')}
             title={t('delete')}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

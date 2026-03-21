@@ -70,12 +70,8 @@
       "emailPlaceholder": "email@example.com",
       "phone": "Phone",
       "phonePlaceholder": "Phone number",
-      "street": "Street address",
-      "streetPlaceholder": "Street address",
       "city": "City",
       "cityPlaceholder": "City",
-      "postalCode": "Postal code",
-      "postalCodePlaceholder": "Postal code",
       "country": "Country",
       "countryPlaceholder": "Country",
       "onlinePresence": "Online presence",
@@ -86,7 +82,8 @@
       "portfolio": "Portfolio / Website",
       "portfolioPlaceholder": "yourwebsite.com",
       "summary": "Summary / Profile",
-      "summaryPlaceholder": "Brief professional summary..."
+      "summaryPlaceholder": "Brief professional summary...",
+      "invalidEmail": "Invalid email"
     },
     "experience": {
       "empty": "No work experience added. Click the button below to add one.",
@@ -103,7 +100,9 @@
       "description": "Description",
       "descriptionPlaceholder": "Responsibilities and achievements...",
       "add": "+ Add work experience",
-      "remove": "Remove"
+      "remove": "Remove",
+      "monthPlaceholder": "Month",
+      "yearPlaceholder": "Year"
     },
     "projects": {
       "empty": "No projects added yet.",
@@ -112,6 +111,7 @@
       "namePlaceholder": "Project name",
       "year": "Year",
       "yearPlaceholder": "Year",
+      "yearSelectPlaceholder": "Year",
       "url": "Link (optional)",
       "urlPlaceholder": "project-url.com",
       "description": "Description",
@@ -130,6 +130,7 @@
       "fieldPlaceholder": "Field of study",
       "year": "Graduation year",
       "yearPlaceholder": "Graduation year",
+      "yearSelectPlaceholder": "Select a year",
       "add": "+ Add education",
       "remove": "Remove"
     },
@@ -142,6 +143,7 @@
       "issuerPlaceholder": "Organization",
       "year": "Year",
       "yearPlaceholder": "Year",
+      "yearSelectPlaceholder": "Year",
       "add": "+ Add a certification",
       "remove": "Remove"
     },

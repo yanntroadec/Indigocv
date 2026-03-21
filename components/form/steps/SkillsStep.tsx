@@ -14,6 +14,7 @@ function LevelDots({ level, onChange }: { level: number; onChange: (l: number) =
           onClick={() => onChange(level === i ? i - 1 : i)}
           className="w-2.5 h-2.5 rounded-full transition-colors focus:outline-none"
           style={{ backgroundColor: i <= level ? '#4f46e5' : '#e0e7ff' }}
+          aria-label={`${i}/5`}
           title={`${i}/5`}
         />
       ))}
@@ -25,7 +26,7 @@ export default function SkillsStep() {
   const { cv, setSkills } = useCVStore()
   const t = useTranslations('form.skills')
   const skills = cv.skills
-    .map((s: any) => (typeof s === 'string' ? { name: s, level: 3 } : s))
+    .map((s: string | { name: string; level: number }) => (typeof s === 'string' ? { name: s, level: 3 } : s))
     .filter((s): s is { name: string; level: number } =>
       typeof s === 'object' && s !== null && typeof s.name === 'string' && typeof s.level === 'number'
     )
@@ -70,7 +71,7 @@ export default function SkillsStep() {
       {skills.length > 0 && (
         <div className="space-y-2">
           {skills.map((skill, i) => (
-            <div key={skill.name || i} className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-3 py-2">
+            <div key={skill.name || i} className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
               <span className="text-sm text-gray-800 flex-1">{skill.name}</span>
               <div className="flex items-center gap-3">
                 <LevelDots level={skill.level} onChange={(l) => setLevel(skill.name, l)} />

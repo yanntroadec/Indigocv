@@ -17,9 +17,7 @@ export interface CVData {
     lastName: string
     email: string
     phone: string
-    street: string
     city: string
-    postalCode: string
     country: string
     jobTitle: string
     summary: string

@@ -54,3 +54,15 @@ body {
   transform: scale(0.97);
 }
 
+/* Style input placeholders */
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+
+select option {
+  color: #111827;
+  background-color: white;
+}
+

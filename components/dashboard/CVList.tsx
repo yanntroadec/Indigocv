@@ -74,7 +74,6 @@ export default function CVList({ initialCvs }: { initialCvs: CVSummary[] }) {
         cvs.map((cv) => (
           <CVCard
             key={cv.id}
-            id={cv.id}
             name={cv.name}
             updatedAt={cv.updated_at}
             personal={cv.personal}

@@ -22,13 +22,17 @@ export default async function DashboardPage() {
     .from('cvs')
     .select('id, name, updated_at, data->personal')
     .order('updated_at', { ascending: false })
+    .limit(50)
 
-  const cvs = (rawCvs ?? []) as unknown as {
-    id: string
-    name: string
-    updated_at: string
-    personal?: { firstName?: string; lastName?: string; jobTitle?: string } | null
-  }[]
+  const cvs = (rawCvs ?? []).map((row) => {
+    const r = row as Record<string, unknown>
+    return {
+      id: String(r.id ?? ''),
+      name: String(r.name ?? ''),
+      updated_at: String(r.updated_at ?? ''),
+      personal: r.personal as { firstName?: string; lastName?: string; jobTitle?: string } | null ?? null,
+    }
+  })
 
   const t = await getTranslations('dashboard')
 

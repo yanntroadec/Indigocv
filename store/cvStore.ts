@@ -5,6 +5,8 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import type { CVData, CVRecord } from '@/types/cv'
 import { createClient } from '@/lib/supabase/client'
 
+let saveTimer: ReturnType<typeof setTimeout> | null = null
+
 const defaultCV: CVData = {
   template: {
     layout: 'single',
@@ -17,7 +19,7 @@ const defaultCV: CVData = {
   photo: null,
   personal: {
     firstName: '', lastName: '', email: '', phone: '',
-    street: '', city: '', postalCode: '', country: '',
+    city: '', country: '',
     jobTitle: '', summary: '', linkedin: '', github: '', portfolio: '',
   },
   experiences: [],
@@ -52,6 +54,7 @@ interface CVStore {
   reset: () => void
   loadCV: (record: CVRecord) => void
   saveCVToSupabase: (name?: string) => Promise<void>
+  debouncedSave: (name?: string) => void
 }
 
 export const useCVStore = create<CVStore>()(
@@ -89,7 +92,7 @@ export const useCVStore = create<CVStore>()(
         const { data: { user } } = await supabase.auth.getUser()
 
         if (!user) {
-          set({ isSaving: false, saveError: 'Non connecté' })
+          set({ isSaving: false, saveError: 'Not authenticated' })
           return
         }
 
@@ -121,9 +124,11 @@ export const useCVStore = create<CVStore>()(
                 .getPublicUrl(filePath)
               cvData = { ...cvData, photo: publicUrl }
             }
-          } catch {
-            // If photo upload fails, continue without photo rather than blocking save
-            cvData = { ...cvData, photo: null }
+          } catch (err) {
+            // If photo upload fails, keep existing photo and report error
+            console.error('Photo upload failed:', err)
+            set({ isSaving: false, saveError: 'Photo upload failed' })
+            return
           }
         }
 
@@ -164,6 +169,12 @@ export const useCVStore = create<CVStore>()(
           set({ isSaving: false, lastSavedAt: new Date() })
         }
       },
+      debouncedSave: (name?: string) => {
+        if (saveTimer) clearTimeout(saveTimer)
+        saveTimer = setTimeout(() => {
+          get().saveCVToSupabase(name)
+        }, 1000)
+      },
     }),
     {
       name: 'indigocv-store',
@@ -179,14 +190,14 @@ export const useCVStore = create<CVStore>()(
         const persistedCV = (persistedStore.cv ?? {}) as Partial<CVData>
 
         // Migrate languages: add id if missing (old sessionStorage format)
-        const languages = (persistedCV.languages ?? []).map((lang: any) =>
+        const languages = (persistedCV.languages ?? []).map((lang: CVData['languages'][number] & { id?: string }) =>
           lang.id ? lang : { ...lang, id: crypto.randomUUID() }
         )
 
         // Migrate skills: convert old string[] format to { name, level }[]
-        const skills = (persistedCV.skills ?? []).map((s: any) =>
+        const skills = (persistedCV.skills ?? []).map((s: string | { name: string; level: number }) =>
           typeof s === 'string' ? { name: s, level: 3 } : s
-        ).filter((s: any) => typeof s === 'object' && s !== null && typeof s.name === 'string')
+        ).filter((s): s is { name: string; level: number } => typeof s === 'object' && s !== null && typeof s.name === 'string')
 
         return {
           ...current,

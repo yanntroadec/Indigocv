@@ -3,6 +3,7 @@
 import { useCVStore } from '@/store/cvStore'
 import { useTranslations } from 'next-intl'
 import type { CVData } from '@/types/cv'
+import { YEARS } from '@/lib/constants'
 
 type Education = CVData['education'][number]
 
@@ -28,7 +29,7 @@ export default function EducationStep() {
       )}
 
       {education.map((edu, index) => (
-        <div key={edu.id} className="border border-gray-200 rounded-xl p-4 space-y-3">
+        <div key={edu.id} className="border border-gray-200 rounded-xl p-4 space-y-3 bg-gray-50">
           <div className="flex items-center justify-between mb-1">
             <span className="text-sm font-semibold text-gray-600">{t('itemLabel', { index: index + 1 })}</span>
             <button type="button" onClick={() => remove(edu.id)} className="text-xs text-red-500 hover:text-red-700 transition">
@@ -43,7 +44,7 @@ export default function EducationStep() {
             <Field label={t('field')} value={edu.field} onChange={(v) => update(edu.id, 'field', v)} placeholder={t('fieldPlaceholder')} />
           </div>
 
-          <Field label={t('year')} value={edu.year} onChange={(v) => update(edu.id, 'year', v)} placeholder={t('yearPlaceholder')} />
+          <YearSelector label={t('year')} value={edu.year} onChange={(v) => update(edu.id, 'year', v)} />
         </div>
       ))}
 
@@ -66,11 +67,34 @@ function Field({ label, value, onChange, placeholder }: {
       <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
       <input
         type="text"
-        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition h-10"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
       />
+    </div>
+  )
+}
+
+function YearSelector({ label, value, onChange }: {
+  label: string; value: string; onChange: (v: string) => void
+}) {
+  const t = useTranslations('form.education')
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition h-10"
+        style={{ color: value ? '#111827' : '#9ca3af' }}
+      >
+        <option value="">{t('yearSelectPlaceholder')}</option>
+        {YEARS.map((year) => (
+          <option key={year} value={year.toString()}>{year}</option>
+        ))}
+      </select>
     </div>
   )
 }
