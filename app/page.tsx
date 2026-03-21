@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function LandingPage() {
   return (
     <main
-      className="min-h-screen flex flex-col items-center justify-center px-4 pt-16"
+      className="min-h-screen flex flex-col items-center justify-center px-4 pt-16 pb-10"
       style={{
         background: `
           repeating-linear-gradient(

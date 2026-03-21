@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 import { AuthProvider } from '@/components/AuthProvider'
 import { createClient } from '@/lib/supabase/server'
 
@@ -36,6 +37,7 @@ export default async function RootLayout({
         <AuthProvider initialUser={user}>
           <Header />
           {children}
+          <Footer />
         </AuthProvider>
       </body>
     </html>

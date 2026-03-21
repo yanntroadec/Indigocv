@@ -28,7 +28,7 @@ export default async function CreatePage({
 
   return (
     <main
-      className="min-h-screen py-10 px-4 pt-28"
+      className="min-h-screen py-10 px-4 pt-28 pb-14"
       style={{
         background: `
           repeating-linear-gradient(
