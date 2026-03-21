@@ -74,6 +74,17 @@ const FONTS: { label: string; value: Template['font']; family: string }[] = [
 
 const SECTION_KEYS: SectionKey[] = ['summary', 'experiences', 'projects', 'education', 'certifications', 'skills', 'languages', 'interests']
 
+const DIVIDER_COLORS: { label: string; value: string }[] = [
+  { label: 'Ghost',    value: '#F1F5F9' },
+  { label: 'Pearl',    value: '#E2E8F0' },
+  { label: 'Slate',    value: '#CBD5E1' },
+  { label: 'Graphite', value: '#94A3B8' },
+  { label: 'Lavender', value: '#DDD6FE' },
+  { label: 'Sky',      value: '#BAE6FD' },
+  { label: 'Mint',     value: '#BBF7D0' },
+  { label: 'Sand',     value: '#FDE68A' },
+]
+
 export default function TemplateStep() {
   const { cv, setTemplate } = useCVStore()
   const t = useTranslations('form.template')
@@ -93,14 +104,14 @@ export default function TemplateStep() {
             onClick={() => update({ layout: 'single' })}
             label={t('singleColumn')}
             badge={t('atsFriendly')}
-            preview={<SinglePreview color={template.accentColor} />}
+            preview={<SinglePreview color={template.accentColor} dividerColor={template.dividerColor ?? '#E2E8F0'} />}
           />
           <LayoutCard
             selected={template.layout === 'sidebar'}
             onClick={() => update({ layout: 'sidebar' })}
             label={t('twoColumns')}
             badge={t('modernDesign')}
-            preview={<SidebarPreview color={template.accentColor} />}
+            preview={<SidebarPreview color={template.accentColor} dividerColor={template.dividerColor ?? '#E2E8F0'} />}
           />
         </div>
       </div>
@@ -129,6 +140,26 @@ export default function TemplateStep() {
                 ))}
               </div>
             </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Divider color */}
+      <div>
+        <p className="text-sm font-semibold text-gray-700 mb-3">{t('dividerColor')}</p>
+        <div className="flex gap-2">
+          {DIVIDER_COLORS.map((c) => (
+            <button
+              key={c.value}
+              type="button"
+              onClick={() => update({ dividerColor: c.value })}
+              title={c.label}
+              className="flex-1 h-6 rounded transition-all border-2"
+              style={{
+                backgroundColor: c.value,
+                borderColor: template.dividerColor === c.value ? '#6366f1' : 'transparent',
+              }}
+            />
           ))}
         </div>
       </div>
@@ -226,16 +257,16 @@ function LayoutCard({ selected, onClick, label, badge, preview }: {
   )
 }
 
-function SinglePreview({ color }: { color: string }) {
+function SinglePreview({ color, dividerColor }: { color: string; dividerColor: string }) {
   return (
     <div className="w-full h-full p-2 flex flex-col gap-1">
       <div className="h-2 w-3/4 rounded" style={{ backgroundColor: color, opacity: 0.8 }} />
       <div className="h-1 w-1/2 rounded bg-gray-200" />
-      <div className="h-px w-full rounded mt-1" style={{ backgroundColor: color, opacity: 0.4 }} />
+      <div className="h-px w-full rounded mt-1" style={{ backgroundColor: dividerColor }} />
       {[0.7, 0.5, 0.6, 0.4, 0.55].map((w, i) => (
         <div key={i} className="h-1 rounded bg-gray-100" style={{ width: `${w * 100}%` }} />
       ))}
-      <div className="h-px w-full rounded mt-1" style={{ backgroundColor: color, opacity: 0.4 }} />
+      <div className="h-px w-full rounded mt-1" style={{ backgroundColor: dividerColor }} />
       {[0.8, 0.5, 0.65].map((w, i) => (
         <div key={i} className="h-1 rounded bg-gray-100" style={{ width: `${w * 100}%` }} />
       ))}
@@ -243,18 +274,19 @@ function SinglePreview({ color }: { color: string }) {
   )
 }
 
-function SidebarPreview({ color }: { color: string }) {
+function SidebarPreview({ color, dividerColor }: { color: string; dividerColor: string }) {
   return (
     <div className="w-full h-full flex">
       <div className="w-2/5 h-full p-1.5 flex flex-col gap-1" style={{ backgroundColor: color }}>
         <div className="h-1.5 w-3/4 rounded bg-white/60" />
         <div className="h-1 w-1/2 rounded bg-white/40" />
-        <div className="mt-1 h-px w-full bg-white/30" />
+        <div className="mt-1 h-px w-full" style={{ backgroundColor: dividerColor, opacity: 0.6 }} />
         {[0.8, 0.6, 0.7, 0.5].map((w, i) => (
           <div key={i} className="h-1 rounded bg-white/30" style={{ width: `${w * 100}%` }} />
         ))}
       </div>
       <div className="flex-1 p-1.5 flex flex-col gap-1">
+        <div className="h-px w-full" style={{ backgroundColor: dividerColor }} />
         {[0.9, 0.6, 0.7, 0.5, 0.8, 0.4, 0.65].map((w, i) => (
           <div key={i} className="h-1 rounded bg-gray-100" style={{ width: `${w * 100}%` }} />
         ))}

@@ -87,6 +87,17 @@ const FONTS: { label: string; value: Template['font']; family: string }[] = [
 
 const SECTION_KEYS: SectionKey[] = ['summary', 'experiences', 'projects', 'education', 'certifications', 'skills', 'languages', 'interests']
 
+const DIVIDER_COLORS: { label: string; value: string }[] = [
+  { label: 'Ghost',    value: '#F1F5F9' },
+  { label: 'Pearl',    value: '#E2E8F0' },
+  { label: 'Slate',    value: '#CBD5E1' },
+  { label: 'Graphite', value: '#94A3B8' },
+  { label: 'Lavender', value: '#DDD6FE' },
+  { label: 'Sky',      value: '#BAE6FD' },
+  { label: 'Mint',     value: '#BBF7D0' },
+  { label: 'Sand',     value: '#FDE68A' },
+]
+
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{children}</p>
 }
@@ -188,14 +199,9 @@ export default function PDFPreview({ isAuthenticated = false }: { isAuthenticate
 
         {/* Fixed top — identity + download */}
         <div className="flex-none p-5 border-b border-gray-100 space-y-3">
-          <div>
-            <h2 className="text-base font-semibold text-gray-900 leading-tight">
-              {currentCvName ?? t('yourCV')}
-            </h2>
-            {cv.personal.jobTitle && (
-              <p className="text-xs text-indigo-600 mt-0.5">{cv.personal.jobTitle}</p>
-            )}
-          </div>
+          <h2 className="text-base font-semibold text-gray-900 leading-tight">
+            {currentCvName ?? t('yourCV')}
+          </h2>
 
           <PDFDownloadLink
             document={<CVDocument cv={cv} sectionTitles={sectionTitles} />}
@@ -277,6 +283,32 @@ export default function PDFPreview({ isAuthenticated = false }: { isAuthenticate
                     ))}
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Divider color */}
+          <div>
+            <SectionLabel>{tTemplate('dividerColor')}</SectionLabel>
+            <div className="grid grid-cols-4 gap-2">
+              {DIVIDER_COLORS.map((c) => (
+                <button
+                  key={c.value}
+                  type="button"
+                  onClick={() => update({ dividerColor: c.value })}
+                  title={c.label}
+                  className="h-8 rounded-lg border-2 transition-all relative flex items-center justify-center"
+                  style={{
+                    backgroundColor: c.value,
+                    borderColor: template.dividerColor === c.value ? '#6366f1' : '#e5e7eb',
+                  }}
+                >
+                  {template.dividerColor === c.value && (
+                    <svg className="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </button>
               ))}
             </div>
           </div>

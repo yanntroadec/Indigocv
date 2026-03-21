@@ -9,6 +9,7 @@ const defaultCV: CVData = {
   template: {
     layout: 'single',
     accentColor: '#5b7fa6',
+    dividerColor: '#E2E8F0',
     font: 'Helvetica',
     density: 'normal',
     hiddenSections: [],
