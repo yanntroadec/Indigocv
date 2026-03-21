@@ -153,27 +153,6 @@ export default function TemplateStep() {
         </div>
       </div>
 
-      {/* Max pages */}
-      <div>
-        <p className="text-sm font-semibold text-gray-700 mb-3">{t('maxPages')}</p>
-        <div className="flex gap-3">
-          {([1, 2] as const).map((n) => (
-            <button
-              key={n}
-              type="button"
-              onClick={() => update({ maxPages: n })}
-              className={`flex-1 rounded-xl border-2 py-3 text-sm font-medium transition ${
-                template.maxPages === n
-                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                  : 'border-gray-200 text-gray-600 hover:border-gray-300'
-              }`}
-            >
-              {n} {t('pages')}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Density */}
       <div>
         <p className="text-sm font-semibold text-gray-700 mb-3">{t('density')}</p>

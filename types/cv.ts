@@ -4,7 +4,6 @@ export interface TemplateSettings {
   layout: 'single' | 'sidebar'
   accentColor: string
   font: 'Helvetica' | 'Times-Roman' | 'Roboto' | 'Lato' | 'Montserrat' | 'Raleway' | 'Playfair Display' | 'Merriweather'
-  maxPages: 1 | 2
   density: 'compact' | 'normal' | 'airy'
   hiddenSections: SectionKey[]
 }

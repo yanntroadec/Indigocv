@@ -10,7 +10,6 @@ const defaultCV: CVData = {
     layout: 'single',
     accentColor: '#5b7fa6',
     font: 'Helvetica',
-    maxPages: 1,
     density: 'normal',
     hiddenSections: [],
   },
