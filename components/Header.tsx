@@ -180,25 +180,26 @@ export default function Header() {
         </span>
       </Link>
 
-      {/* Center — step indicator on /create only */}
-      <div className="absolute left-1/2 -translate-x-1/2">
+      {/* Center — step indicator on /create only (desktop) */}
+      <div className="absolute left-1/2 -translate-x-1/2 hidden sm:block">
         {pathname === '/create' && <StepIndicator />}
       </div>
 
-      {/* Right — contextual actions + user menu */}
+      {/* Right — desktop: full actions | mobile: user menu only */}
       <div className="flex items-center gap-3">
-        {pathname === '/create' && (
-          <>
-            <NewCVButton className="hidden sm:block" />
-            <Link
-              href="/preview"
-              className="indigo-btn rounded-xl px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition"
-            >
-              <span className="sm:hidden">Aperçu →</span>
-              <span className="hidden sm:inline">Prévisualiser →</span>
-            </Link>
-          </>
-        )}
+        <div className="hidden sm:flex items-center gap-3">
+          {pathname === '/create' && (
+            <>
+              <NewCVButton />
+              <Link
+                href="/preview"
+                className="indigo-btn rounded-xl px-4 py-2 text-sm font-semibold transition"
+              >
+                Prévisualiser →
+              </Link>
+            </>
+          )}
+        </div>
         <UserMenu />
       </div>
     </header>
