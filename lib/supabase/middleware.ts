@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const LOCALES = ['en', 'fr']
+const LOCALES = ['en', 'fr', 'es']
 
 function stripLocale(pathname: string): { strippedPath: string; locale: string } {
   const segments = pathname.split('/')

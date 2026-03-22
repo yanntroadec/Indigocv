@@ -84,11 +84,13 @@ export const DIVIDER_COLORS: { label: string; value: string }[] = [
 export const MONTHS: Record<string, string[]> = {
   en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
   fr: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+  es: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
 }
 
 export const LANGUAGE_LEVELS: Record<string, string[]> = {
   en: ['Beginner', 'Intermediate', 'Fluent', 'Bilingual', 'Native'],
   fr: ['Débutant', 'Intermédiaire', 'Courant', 'Bilingue', 'Maternelle'],
+  es: ['Principiante', 'Intermedio', 'Fluido', 'Bilingüe', 'Nativo'],
 }
 
 const CURRENT_YEAR = new Date().getFullYear()

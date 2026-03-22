@@ -14,19 +14,22 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://indigocv.vercel.ap
 const descriptions: Record<string, string> = {
   en: 'Create and download your professional CV as a PDF, directly in your browser. Free and instant.',
   fr: 'Créez et téléchargez votre CV professionnel en PDF, directement dans votre navigateur. Gratuit et instantané.',
+  es: 'Crea y descarga tu CV profesional en PDF, directamente en tu navegador. Gratis e instantáneo.',
 }
 
 const titles: Record<string, string> = {
   en: 'Create your clean and professional CV',
   fr: 'Créez votre CV propre et professionnel',
+  es: 'Crea tu CV limpio y profesional',
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params
   const title = titles[locale] || titles.en
   const description = descriptions[locale] || descriptions.en
-  const ogLocale = locale === 'fr' ? 'fr_FR' : 'en_US'
-  const altLocale = locale === 'fr' ? 'en_US' : 'fr_FR'
+  const ogLocaleMap: Record<string, string> = { en: 'en_US', fr: 'fr_FR', es: 'es_ES' }
+  const ogLocale = ogLocaleMap[locale] || 'en_US'
+  const altLocale = Object.values(ogLocaleMap).filter((l) => l !== ogLocale)
 
   return {
     title: {
@@ -62,6 +65,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       languages: {
         en: `${SITE_URL}/en`,
         fr: `${SITE_URL}/fr`,
+        es: `${SITE_URL}/es`,
       },
     },
   }
@@ -76,7 +80,7 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params
 
-  if (!routing.locales.includes(locale as 'en' | 'fr')) {
+  if (!routing.locales.includes(locale as 'en' | 'fr' | 'es')) {
     notFound()
   }
 
