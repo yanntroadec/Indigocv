@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
   return {
     title: {
-      default: `IndigoCV — ${title}`,
+      default: 'IndigoCV',
       template: '%s — IndigoCV',
     },
     description,
