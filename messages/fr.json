@@ -58,6 +58,9 @@
     "saveProfile": "Sauvegarder les infos",
     "savingProfile": "Sauvegarde…",
     "profileSaved": "Sauvegardé !",
+    "profile": {
+      "new": "Non sauvegardé"
+    },
     "steps": {
       "template": { "label": "Modèle", "short": "Modèle" },
       "photo": { "label": "Photo de profil", "short": "Photo" },
@@ -250,9 +253,12 @@
     "present": "Présent"
   },
   "preview": {
-    "backToEdit": "← Modifier mon profil",
+    "editProfile": "Modifier {name}",
+    "newProfileFromData": "Nouveau profil depuis ce PDF",
+    "profileAction": "Profil…",
+    "backToDashboard": "Dashboard",
     "download": "Télécharger le PDF",
-    "save": "Sauvegarder",
+    "save": "Sauvegarder le PDF",
     "saving": "Sauvegarde…",
     "saved": "Sauvegardé",
     "newCV": "Nouveau CV",

@@ -1,14 +1,14 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useCVStore } from '@/store/cvStore'
 import { useTranslations, useLocale } from 'next-intl'
 import { Link, useRouter } from '@/i18n/navigation'
 import CVDocument from './CVDocument'
-import type { CVData, SectionKey, ProfileRecord } from '@/types/cv'
+import type { CVData, SectionKey } from '@/types/cv'
 import { COLOR_PALETTES, FONTS, SECTION_KEYS, DIVIDER_COLORS } from '@/lib/constants'
-import { createClient } from '@/lib/supabase/client'
+
 
 type Template = CVData['template']
 
@@ -83,7 +83,7 @@ interface PDFPreviewProps {
 }
 
 export default function PDFPreview({ isAuthenticated = false, profiles = [] }: PDFPreviewProps) {
-  const { cv, currentCvName, currentProfileId, setTemplate, isSaving, lastSavedAt, saveError, saveCVToSupabase, loadProfile, reset } = useCVStore()
+  const { cv, currentCvName, currentProfileId, currentProfileName, setTemplate, isSaving, lastSavedAt, saveError, saveCVToSupabase } = useCVStore()
   const locale = useLocale()
   const t = useTranslations('preview')
   const tHeader = useTranslations('header')
@@ -92,26 +92,27 @@ export default function PDFPreview({ isAuthenticated = false, profiles = [] }: P
   const router = useRouter()
   const template = cv.template
   const update = (patch: Partial<Template>) => setTemplate({ ...template, ...patch })
-  const [loadingProfile, setLoadingProfile] = useState(false)
 
-  const handleProfileChange = useCallback(async (profileId: string) => {
-    if (!profileId) return
-    setLoadingProfile(true)
-    try {
-      const supabase = createClient()
-      const { data } = await supabase
-        .from('profiles')
-        .select('id, name, data, created_at, updated_at')
-        .eq('id', profileId)
-        .single()
+  const linkedProfile = currentProfileId ? profiles.find((p) => p.id === currentProfileId) : null
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
+  const profileMenuRef = useRef<HTMLDivElement>(null)
 
-      if (data) {
-        loadProfile(data as ProfileRecord)
-      }
-    } finally {
-      setLoadingProfile(false)
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) setProfileMenuOpen(false)
     }
-  }, [loadProfile])
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  function handleEditProfile() {
+    router.push('/create')
+  }
+
+  function handleNewProfileFromData() {
+    useCVStore.setState({ currentProfileId: null, currentProfileName: null })
+    router.push('/create')
+  }
 
   const sectionTitles = {
     profile: tCv('profile'),
@@ -162,47 +163,73 @@ export default function PDFPreview({ isAuthenticated = false, profiles = [] }: P
           </PDFDownloadLink>
 
           {isAuthenticated && (
-            <div>
-              <button
-                type="button"
-                onClick={() => saveCVToSupabase()}
-                disabled={isSaving}
-                className="indigo-btn block w-full rounded-xl px-4 py-2 text-center text-sm font-semibold transition disabled:opacity-50"
-              >
-                {isSaving ? t('saving') : t('save')}
-              </button>
-              {lastSavedAt && !saveError && (
-                <p className="text-[10px] text-gray-400 text-center mt-1">
-                  {t('saved')} {lastSavedAt.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
-                </p>
+            <>
+              <div>
+                <button
+                  type="button"
+                  onClick={() => saveCVToSupabase()}
+                  disabled={isSaving}
+                  className="indigo-btn block w-full rounded-xl px-4 py-2 text-center text-sm font-semibold transition disabled:opacity-50"
+                >
+                  {isSaving ? t('saving') : t('save')}
+                </button>
+                {lastSavedAt && !saveError && (
+                  <p className="text-[10px] text-gray-400 text-center mt-1">
+                    {t('saved')} {lastSavedAt.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                )}
+                {saveError && (
+                  <p className="text-[10px] text-red-500 text-center mt-1">{saveError}</p>
+                )}
+              </div>
+
+              {linkedProfile ? (
+                <div ref={profileMenuRef} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setProfileMenuOpen((o) => !o)}
+                    className="w-full flex items-center rounded-xl border-2 border-gray-200 px-3 py-2.5 bg-white hover:border-gray-300 transition"
+                  >
+                    <span className="text-sm font-semibold text-gray-800 flex-1 text-center">{t('editProfile', { name: linkedProfile.name })}</span>
+                    <svg className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${profileMenuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {profileMenuOpen && (
+                    <div className="absolute z-50 mt-1 w-full rounded-xl border border-gray-100 bg-white shadow-lg overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => { setProfileMenuOpen(false); handleEditProfile() }}
+                        className="w-full flex items-center px-3 py-2.5 text-left text-sm font-medium text-gray-800 transition hover:bg-gray-50"
+                      >
+                        {t('editProfile', { name: linkedProfile.name })}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setProfileMenuOpen(false); handleNewProfileFromData() }}
+                        className="w-full flex items-center px-3 py-2.5 text-left text-sm font-medium text-gray-800 transition hover:bg-gray-50"
+                      >
+                        {t('newProfileFromData')}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleNewProfileFromData}
+                  className="w-full rounded-xl border-2 border-gray-200 px-3 py-2.5 bg-white text-sm font-semibold text-gray-800 hover:border-gray-300 transition text-center"
+                >
+                  {t('newProfileFromData')}
+                </button>
               )}
-              {saveError && (
-                <p className="text-[10px] text-red-500 text-center mt-1">{saveError}</p>
-              )}
-            </div>
+            </>
           )}
         </div>
 
         {/* Scrollable customisation area */}
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
-
-          {/* Profile selector — authenticated users with saved profiles */}
-          {isAuthenticated && profiles.length > 0 && (
-            <div>
-              <SectionLabel>{t('selectProfile')}</SectionLabel>
-              <select
-                value={currentProfileId ?? ''}
-                onChange={(e) => handleProfileChange(e.target.value)}
-                disabled={loadingProfile}
-                className="w-full rounded-xl border-2 border-gray-200 px-3 py-2.5 bg-white text-sm text-gray-800 hover:border-gray-300 transition disabled:opacity-50"
-              >
-                <option value="">{t('customProfile')}</option>
-                {profiles.map((p) => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
-            </div>
-          )}
 
           {/* Layout */}
           <div>
@@ -337,10 +364,10 @@ export default function PDFPreview({ isAuthenticated = false, profiles = [] }: P
         {/* Fixed bottom — navigation */}
         <div className="flex-none p-5 border-t border-gray-100 space-y-2">
           <Link
-            href="/create"
-            className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-center text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+            href="/dashboard"
+            className="magenta-btn block w-full rounded-xl px-4 py-2.5 text-center text-sm font-medium transition"
           >
-            {t('backToEdit')}
+            {t('backToDashboard')}
           </Link>
           <Link
             href="/"

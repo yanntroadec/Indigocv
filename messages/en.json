@@ -58,6 +58,9 @@
     "saveProfile": "Save personal info",
     "savingProfile": "Saving…",
     "profileSaved": "Saved!",
+    "profile": {
+      "new": "Unsaved"
+    },
     "steps": {
       "template": { "label": "Template", "short": "Template" },
       "photo": { "label": "Profile photo", "short": "Photo" },
@@ -250,9 +253,12 @@
     "present": "Present"
   },
   "preview": {
-    "backToEdit": "← Edit my profile",
+    "editProfile": "Edit {name}",
+    "newProfileFromData": "New profile from this PDF",
+    "profileAction": "Profile…",
+    "backToDashboard": "Dashboard",
     "download": "Download PDF",
-    "save": "Save",
+    "save": "Save PDF",
     "saving": "Saving…",
     "saved": "Saved",
     "newCV": "New CV",

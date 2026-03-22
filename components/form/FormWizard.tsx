@@ -30,7 +30,8 @@ export default function FormWizard() {
   const t = useTranslations('form')
   const router = useRouter()
   const { user } = useUser()
-  const { step, setStep, isSavingProfile, lastProfileSavedAt, saveError, saveProfileToSupabase } = useCVStore()
+  const t2 = useTranslations('form.profile')
+  const { step, setStep, currentProfileId, currentProfileName, isSavingProfile, lastProfileSavedAt, saveError, saveProfileToSupabase } = useCVStore()
 
   const StepComponent = STEPS[step].component
   const isFirst = step === 0
@@ -54,9 +55,14 @@ export default function FormWizard() {
   return (
     <div className="w-full max-w-xl mx-auto">
       <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-sm border border-white/80 p-6 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-5">
-          {t(`steps.${STEPS[step].key}.label`)}
-        </h2>
+        <div className="flex items-start justify-between mb-5">
+          <h2 className="text-lg font-semibold text-gray-900">
+            {t(`steps.${STEPS[step].key}.label`)}
+          </h2>
+          <span className="text-xs font-medium text-indigo-600 bg-indigo-50 rounded-lg px-2.5 py-1 shrink-0 ml-3">
+            {currentProfileId ? currentProfileName : t2('new')}
+          </span>
+        </div>
         <StepComponent />
       </div>
 
