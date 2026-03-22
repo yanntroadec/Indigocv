@@ -8,6 +8,8 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { AuthProvider } from '@/components/AuthProvider'
 import { createClient } from '@/lib/supabase/server'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://indigocv.vercel.app'
 
@@ -108,6 +110,8 @@ export default async function LocaleLayout({
             </div>
           </AuthProvider>
         </NextIntlClientProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
