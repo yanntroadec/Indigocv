@@ -9,14 +9,62 @@ import Footer from '@/components/Footer'
 import { AuthProvider } from '@/components/AuthProvider'
 import { createClient } from '@/lib/supabase/server'
 
-export const metadata: Metadata = {
-  title: 'IndigoCV',
-  description: 'Create and download your professional CV as a PDF, directly in your browser.',
-  openGraph: {
-    title: 'IndigoCV',
-    description: 'Create and download your CV as a PDF.',
-    type: 'website',
-  },
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://indigocv.vercel.app'
+
+const descriptions: Record<string, string> = {
+  en: 'Create and download your professional CV as a PDF, directly in your browser. Free and instant.',
+  fr: 'Créez et téléchargez votre CV professionnel en PDF, directement dans votre navigateur. Gratuit et instantané.',
+}
+
+const titles: Record<string, string> = {
+  en: 'Create your clean and professional CV',
+  fr: 'Créez votre CV propre et professionnel',
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params
+  const title = titles[locale] || titles.en
+  const description = descriptions[locale] || descriptions.en
+  const ogLocale = locale === 'fr' ? 'fr_FR' : 'en_US'
+  const altLocale = locale === 'fr' ? 'en_US' : 'fr_FR'
+
+  return {
+    title: {
+      default: `IndigoCV — ${title}`,
+      template: '%s — IndigoCV',
+    },
+    description,
+    openGraph: {
+      title: `IndigoCV — ${title}`,
+      description,
+      type: 'website',
+      siteName: 'IndigoCV',
+      locale: ogLocale,
+      alternateLocale: altLocale,
+      url: `${SITE_URL}/${locale}`,
+      images: [
+        {
+          url: '/og-image.png',
+          width: 1200,
+          height: 630,
+          alt: 'IndigoCV',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `IndigoCV — ${title}`,
+      description,
+      images: ['/og-image.png'],
+    },
+    alternates: {
+      canonical: `${SITE_URL}/${locale}`,
+      languages: {
+        en: `${SITE_URL}/en`,
+        fr: `${SITE_URL}/fr`,
+      },
+    },
+  }
 }
 
 export default async function LocaleLayout({
