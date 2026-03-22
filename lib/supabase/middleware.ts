@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 const LOCALES = ['en', 'fr', 'es']
 
-function stripLocale(pathname: string): { strippedPath: string; locale: string } {
+export function stripLocale(pathname: string): { strippedPath: string; locale: string } {
   const segments = pathname.split('/')
   const locale = LOCALES.includes(segments[1]) ? segments[1] : 'en'
   const strippedPath = LOCALES.includes(segments[1])
