@@ -41,3 +41,6 @@ claude.md
 #Notes
 Roadmap.md
 
+#Vitest
+coverage/
+.vitest/
