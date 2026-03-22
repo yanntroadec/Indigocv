@@ -257,7 +257,7 @@
   "preview": {
     "editProfile": "Modifier {name}",
     "newProfileFromData": "Nouveau profil depuis ce PDF",
-    "recoverProfile": "Récupérer le profil",
+    "recoverProfile": "Modifier le profil",
     "profileAction": "Profil…",
     "backToDashboard": "Dashboard",
     "download": "Télécharger le PDF",
