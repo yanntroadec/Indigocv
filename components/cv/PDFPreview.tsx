@@ -7,7 +7,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import { Link, useRouter } from '@/i18n/navigation'
 import CVDocument from './CVDocument'
 import type { CVData, SectionKey } from '@/types/cv'
-import { COLOR_PALETTES, FONTS, SECTION_KEYS, DIVIDER_COLORS } from '@/lib/constants'
+import { COLOR_PALETTES, FONTS, SECTION_KEYS, DIVIDER_COLORS, OPTIONAL_COLORS } from '@/lib/constants'
 
 
 type Template = CVData['template']
@@ -309,6 +309,48 @@ export default function PDFPreview({ isAuthenticated = false, profiles = [] }: P
               ))}
             </div>
           </div>
+
+          {/* Optional color — sidebar layout only */}
+          {template.layout === 'sidebar' && <div>
+            <div className="flex items-center justify-between mb-2">
+              <SectionLabel>{tTemplate('jobTitleColor')}</SectionLabel>
+              <button
+                type="button"
+                onClick={() => update({ useOptionalColor: !template.useOptionalColor })}
+                className={`rounded-full px-3 py-1 text-[10px] font-semibold border transition ${
+                  template.useOptionalColor
+                    ? 'border-indigo-300 text-indigo-600 bg-indigo-50'
+                    : 'border-gray-200 text-gray-400 bg-white'
+                }`}
+              >
+                {template.useOptionalColor ? 'ON' : 'OFF'}
+              </button>
+            </div>
+            {template.useOptionalColor && (
+              <div className="grid grid-cols-4 gap-2">
+                {OPTIONAL_COLORS.map((c) => (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => update({ jobTitleColor: c.value })}
+                    aria-label={c.label}
+                    title={c.label}
+                    className="h-8 rounded-lg border-2 transition-all relative flex items-center justify-center"
+                    style={{
+                      backgroundColor: c.value,
+                      borderColor: template.jobTitleColor === c.value ? '#6366f1' : '#e5e7eb',
+                    }}
+                  >
+                    {template.jobTitleColor === c.value && (
+                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>}
 
           {/* Font */}
           <div>

@@ -4,6 +4,8 @@ export interface TemplateSettings {
   layout: 'single' | 'sidebar'
   accentColor: string
   dividerColor: string
+  jobTitleColor: string
+  useOptionalColor: boolean
   font: 'Helvetica' | 'Times-Roman' | 'Roboto' | 'Lato' | 'Montserrat' | 'Raleway' | 'Playfair Display' | 'Merriweather'
   density: 'compact' | 'normal' | 'airy'
   hiddenSections: SectionKey[]

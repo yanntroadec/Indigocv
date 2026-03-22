@@ -14,6 +14,8 @@ const defaultCV: CVData = {
     layout: 'single',
     accentColor: '#5b7fa6',
     dividerColor: '#E2E8F0',
+    jobTitleColor: '#94A3B8',
+    useOptionalColor: true,
     font: 'Helvetica',
     density: 'normal',
     hiddenSections: [],

@@ -81,6 +81,17 @@ export const DIVIDER_COLORS: { label: string; value: string }[] = [
   { label: 'Sand',     value: '#FDE68A' },
 ]
 
+export const OPTIONAL_COLORS: { label: string; value: string }[] = [
+  { label: 'Stone',    value: '#78716C' },
+  { label: 'Zinc',     value: '#71717A' },
+  { label: 'Slate',    value: '#94A3B8' },
+  { label: 'Sage',     value: '#8EAF96' },
+  { label: 'Steel',    value: '#8BA3B5' },
+  { label: 'Mauve',    value: '#A89BB5' },
+  { label: 'Blush',    value: '#B5A0A8' },
+  { label: 'Sand',     value: '#B5A88F' },
+]
+
 export const MONTHS: Record<string, string[]> = {
   en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
   fr: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],

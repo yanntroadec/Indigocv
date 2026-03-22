@@ -3,6 +3,7 @@
 import { useCVStore } from '@/store/cvStore'
 import { useTranslations } from 'next-intl'
 import type { CVData } from '@/types/cv'
+import PhoneField from '@/components/form/PhoneField'
 
 export default function PersonalStep() {
   const { cv, setPersonal } = useCVStore()
@@ -25,7 +26,7 @@ export default function PersonalStep() {
       </div>
       <Field label={t('jobTitle')} value={personal.jobTitle} onChange={(v) => update('jobTitle', v)} placeholder={t('jobTitlePlaceholder')} />
       <Field label={t('email')} type="email" value={personal.email} onChange={(v) => update('email', v)} placeholder={t('emailPlaceholder')} invalidMessage={t('invalidEmail')} />
-      <Field label={t('phone')} type="tel" value={personal.phone} onChange={(v) => update('phone', v)} placeholder={t('phonePlaceholder')} />
+      <PhoneField label={t('phone')} value={personal.phone} onChange={(v) => update('phone', v)} placeholder={t('phonePlaceholder')} invalidMessage={t('invalidPhone')} />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label={t('city')} value={personal.city} onChange={(v) => update('city', v)} placeholder={t('cityPlaceholder')} />
         <Field label={t('country')} value={personal.country} onChange={(v) => update('country', v)} placeholder={t('countryPlaceholder')} />
