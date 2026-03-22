@@ -13,6 +13,7 @@ interface CVSummary {
   name: string
   updated_at: string
   personal?: { firstName?: string; lastName?: string; jobTitle?: string } | null
+  profileName?: string | null
 }
 
 export default function CVList({ initialCvs }: { initialCvs: CVSummary[] }) {
@@ -30,7 +31,7 @@ export default function CVList({ initialCvs }: { initialCvs: CVSummary[] }) {
 
     if (data) {
       useCVStore.getState().loadCV(data as CVRecord)
-      router.push('/create')
+      router.push('/preview')
     }
   }
 
@@ -50,24 +51,8 @@ export default function CVList({ initialCvs }: { initialCvs: CVSummary[] }) {
     }
   }
 
-  function handleNewCV() {
-    useCVStore.getState().reset()
-    router.push('/create')
-  }
-
   return (
     <div className="space-y-4">
-      <button
-        type="button"
-        onClick={handleNewCV}
-        className="w-full bg-white/70 backdrop-blur-sm rounded-2xl border-2 border-dashed border-gray-300 hover:border-indigo-400 hover:bg-white/90 transition p-5 text-center group"
-      >
-        <span className="text-2xl">+</span>
-        <p className="text-sm font-medium text-gray-600 group-hover:text-indigo-600 mt-1 transition">
-          {t('newCV')}
-        </p>
-      </button>
-
       {cvs.length === 0 ? (
         <p className="text-center text-sm text-gray-400 py-8">{t('empty')}</p>
       ) : (
@@ -77,6 +62,7 @@ export default function CVList({ initialCvs }: { initialCvs: CVSummary[] }) {
             name={cv.name}
             updatedAt={cv.updated_at}
             personal={cv.personal}
+            profileName={cv.profileName}
             onOpen={() => handleOpen(cv.id)}
             onDelete={() => handleDelete(cv.id)}
             onRename={(newName) => handleRename(cv.id, newName)}

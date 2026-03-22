@@ -59,10 +59,21 @@ export interface CVData {
   interests: string[]
 }
 
+export type ProfileData = Omit<CVData, 'template'>
+
+export interface ProfileRecord {
+  id: string
+  name: string
+  data: ProfileData
+  created_at: string
+  updated_at: string
+}
+
 export interface CVRecord {
   id: string
   name: string
   data: CVData
+  profile_id?: string | null
   created_at: string
   updated_at: string
 }

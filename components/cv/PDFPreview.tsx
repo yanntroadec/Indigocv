@@ -1,13 +1,14 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useCVStore } from '@/store/cvStore'
 import { useTranslations, useLocale } from 'next-intl'
 import { Link, useRouter } from '@/i18n/navigation'
 import CVDocument from './CVDocument'
-import type { CVData, SectionKey } from '@/types/cv'
+import type { CVData, SectionKey, ProfileRecord } from '@/types/cv'
 import { COLOR_PALETTES, FONTS, SECTION_KEYS, DIVIDER_COLORS } from '@/lib/constants'
+import { createClient } from '@/lib/supabase/client'
 
 type Template = CVData['template']
 
@@ -76,8 +77,13 @@ function FontPicker({ value, onChange }: { value: Template['font']; onChange: (f
   )
 }
 
-export default function PDFPreview({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
-  const { cv, currentCvName, setTemplate, isSaving, lastSavedAt, saveError, saveCVToSupabase, reset } = useCVStore()
+interface PDFPreviewProps {
+  isAuthenticated?: boolean
+  profiles?: { id: string; name: string }[]
+}
+
+export default function PDFPreview({ isAuthenticated = false, profiles = [] }: PDFPreviewProps) {
+  const { cv, currentCvName, currentProfileId, setTemplate, isSaving, lastSavedAt, saveError, saveCVToSupabase, loadProfile, reset } = useCVStore()
   const locale = useLocale()
   const t = useTranslations('preview')
   const tHeader = useTranslations('header')
@@ -86,6 +92,26 @@ export default function PDFPreview({ isAuthenticated = false }: { isAuthenticate
   const router = useRouter()
   const template = cv.template
   const update = (patch: Partial<Template>) => setTemplate({ ...template, ...patch })
+  const [loadingProfile, setLoadingProfile] = useState(false)
+
+  const handleProfileChange = useCallback(async (profileId: string) => {
+    if (!profileId) return
+    setLoadingProfile(true)
+    try {
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, name, data, created_at, updated_at')
+        .eq('id', profileId)
+        .single()
+
+      if (data) {
+        loadProfile(data as ProfileRecord)
+      }
+    } finally {
+      setLoadingProfile(false)
+    }
+  }, [loadProfile])
 
   const sectionTitles = {
     profile: tCv('profile'),
@@ -121,7 +147,7 @@ export default function PDFPreview({ isAuthenticated = false }: { isAuthenticate
       {/* Side panel — right */}
       <aside className="w-full lg:w-72 bg-white/70 backdrop-blur-sm border-t lg:border-t-0 lg:border-l border-white/80 flex flex-col h-full">
 
-        {/* Fixed top — identity + download */}
+        {/* Fixed top — identity + download + save */}
         <div className="flex-none p-5 border-b border-gray-100 space-y-3">
           <h2 className="text-base font-semibold text-gray-900 leading-tight">
             {currentCvName ?? t('yourCV')}
@@ -159,6 +185,24 @@ export default function PDFPreview({ isAuthenticated = false }: { isAuthenticate
 
         {/* Scrollable customisation area */}
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
+
+          {/* Profile selector — authenticated users with saved profiles */}
+          {isAuthenticated && profiles.length > 0 && (
+            <div>
+              <SectionLabel>{t('selectProfile')}</SectionLabel>
+              <select
+                value={currentProfileId ?? ''}
+                onChange={(e) => handleProfileChange(e.target.value)}
+                disabled={loadingProfile}
+                className="w-full rounded-xl border-2 border-gray-200 px-3 py-2.5 bg-white text-sm text-gray-800 hover:border-gray-300 transition disabled:opacity-50"
+              >
+                <option value="">{t('customProfile')}</option>
+                {profiles.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Layout */}
           <div>
@@ -298,13 +342,6 @@ export default function PDFPreview({ isAuthenticated = false }: { isAuthenticate
           >
             {t('backToEdit')}
           </Link>
-          <button
-            type="button"
-            onClick={() => { reset(); router.push('/create') }}
-            className="magenta-btn block w-full rounded-xl px-4 py-2.5 text-center text-sm font-medium transition"
-          >
-            {t('newCV')}
-          </button>
           <Link
             href="/"
             className="indigo-btn block w-full rounded-xl px-4 py-2.5 text-center text-sm font-medium transition"

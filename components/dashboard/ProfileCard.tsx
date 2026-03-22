@@ -3,17 +3,17 @@
 import { useState } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 
-interface CVCardProps {
+interface ProfileCardProps {
   name: string
   updatedAt: string
   personal?: { firstName?: string; lastName?: string; jobTitle?: string } | null
-  profileName?: string | null
-  onOpen: () => void
+  onEdit: () => void
+  onUseForCV: () => void
   onDelete: () => void
   onRename: (newName: string) => void
 }
 
-export default function CVCard({ name, updatedAt, personal, profileName, onOpen, onDelete, onRename }: CVCardProps) {
+export default function ProfileCard({ name, updatedAt, personal, onEdit, onUseForCV, onDelete, onRename }: ProfileCardProps) {
   const t = useTranslations('dashboard')
   const locale = useLocale()
   const [editing, setEditing] = useState(false)
@@ -55,20 +55,25 @@ export default function CVCard({ name, updatedAt, personal, profileName, onOpen,
         {displayName && (
           <p className="text-xs text-gray-500 mt-0.5 truncate">{displayName}{personal?.jobTitle ? ` · ${personal.jobTitle}` : ''}</p>
         )}
-        <p className="text-[10px] text-gray-400 mt-1">
-          {t('modifiedOn', { date })}
-          {' · '}
-          {profileName ? t('linkedTo', { name: profileName }) : t('noProfile')}
-        </p>
+        <p className="text-[10px] text-gray-400 mt-1">{t('modifiedOn', { date })}</p>
       </div>
 
       <div className="flex items-center gap-2 flex-none">
         <button
           type="button"
-          onClick={onOpen}
+          onClick={onEdit}
           className="indigo-btn rounded-lg px-3 py-1.5 text-xs font-semibold transition"
         >
-          {t('openCV')}
+          {t('editProfile')}
+        </button>
+
+        <button
+          type="button"
+          onClick={onUseForCV}
+          className="magenta-btn rounded-lg px-3 py-1.5 text-xs font-semibold transition"
+          title={t('useForCV')}
+        >
+          {t('useForCV')}
         </button>
 
         <button

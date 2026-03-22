@@ -33,20 +33,31 @@
     "backHome": "← Back to home"
   },
   "dashboard": {
-    "title": "My CVs",
+    "title": "My dashboard",
+    "profilesTitle": "My Profiles",
+    "cvsTitle": "My CVs",
     "newCV": "Create a new CV",
+    "newProfile": "Create a new profile",
     "empty": "You have no saved CVs yet.",
+    "emptyProfiles": "You have no saved profiles yet.",
     "openCV": "Open",
+    "editProfile": "Edit",
+    "useForCV": "Use for CV",
     "rename": "Rename",
     "delete": "Delete",
     "confirmDelete": "Confirm",
     "cancelDelete": "Cancel",
-    "modifiedOn": "Modified on {date}"
+    "modifiedOn": "Modified on {date}",
+    "linkedTo": "Profile: {name}",
+    "noProfile": "No linked profile"
   },
   "form": {
     "prev": "← Back",
     "next": "Next →",
     "finish": "Preview my CV →",
+    "saveProfile": "Save personal info",
+    "savingProfile": "Saving…",
+    "profileSaved": "Saved!",
     "steps": {
       "template": { "label": "Template", "short": "Template" },
       "photo": { "label": "Profile photo", "short": "Photo" },
@@ -239,12 +250,14 @@
     "present": "Present"
   },
   "preview": {
-    "backToEdit": "← Edit my CV",
+    "backToEdit": "← Edit my profile",
     "download": "Download PDF",
     "save": "Save",
     "saving": "Saving…",
     "saved": "Saved",
     "newCV": "New CV",
-    "yourCV": "Your CV"
+    "yourCV": "Your CV",
+    "selectProfile": "Profile",
+    "customProfile": "Custom (current data)"
   }
 }

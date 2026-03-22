@@ -2,10 +2,12 @@
 
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import type { CVData, CVRecord } from '@/types/cv'
+import type { CVData, CVRecord, ProfileData, ProfileRecord } from '@/types/cv'
 import { createClient } from '@/lib/supabase/client'
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null
+
+const STORE_VERSION = 2
 
 const defaultCV: CVData = {
   template: {
@@ -34,10 +36,15 @@ const defaultCV: CVData = {
 interface CVStore {
   cv: CVData
   step: number
+  storeVersion: number
   currentCvId: string | null
   currentCvName: string | null
+  currentProfileId: string | null
+  currentProfileName: string | null
   isSaving: boolean
+  isSavingProfile: boolean
   lastSavedAt: Date | null
+  lastProfileSavedAt: Date | null
   saveError: string | null
   setTemplate: (template: CVData['template']) => void
   setPhoto: (photo: string | null) => void
@@ -53,7 +60,10 @@ interface CVStore {
   setCvName: (name: string) => void
   reset: () => void
   loadCV: (record: CVRecord) => void
+  loadProfile: (record: ProfileRecord) => void
+  getProfileData: () => ProfileData
   saveCVToSupabase: (name?: string) => Promise<void>
+  saveProfileToSupabase: (name?: string) => Promise<void>
   debouncedSave: (name?: string) => void
 }
 
@@ -62,10 +72,15 @@ export const useCVStore = create<CVStore>()(
     (set, get) => ({
       cv: defaultCV,
       step: 0,
+      storeVersion: STORE_VERSION,
       currentCvId: null,
       currentCvName: null,
+      currentProfileId: null,
+      currentProfileName: null,
       isSaving: false,
+      isSavingProfile: false,
       lastSavedAt: null,
+      lastProfileSavedAt: null,
       saveError: null,
       setTemplate: (template) => set((s) => ({ cv: { ...s.cv, template } })),
       setPhoto: (photo) => set((s) => ({ cv: { ...s.cv, photo } })),
@@ -79,10 +94,129 @@ export const useCVStore = create<CVStore>()(
       setInterests: (interests) => set((s) => ({ cv: { ...s.cv, interests } })),
       setStep: (step) => set({ step }),
       setCvName: (name) => set({ currentCvName: name }),
-      reset: () => set({ cv: defaultCV, step: 0, currentCvId: null, currentCvName: null, isSaving: false, lastSavedAt: null, saveError: null }),
+      reset: () => set({
+        cv: defaultCV, step: 0,
+        currentCvId: null, currentCvName: null,
+        currentProfileId: null, currentProfileName: null,
+        isSaving: false, isSavingProfile: false,
+        lastSavedAt: null, lastProfileSavedAt: null, saveError: null,
+      }),
 
       loadCV: (record: CVRecord) => {
-        set({ cv: record.data, currentCvId: record.id, currentCvName: record.name, step: 0, saveError: null })
+        set({
+          cv: record.data,
+          currentCvId: null,
+          currentCvName: record.name,
+          currentProfileId: record.profile_id ?? null,
+          currentProfileName: null,
+          step: 0,
+          saveError: null,
+        })
+      },
+
+      loadProfile: (record: ProfileRecord) => {
+        set((s) => ({
+          cv: {
+            ...s.cv,
+            photo: record.data.photo,
+            personal: record.data.personal,
+            experiences: record.data.experiences,
+            education: record.data.education,
+            skills: record.data.skills,
+            languages: record.data.languages,
+            projects: record.data.projects,
+            certifications: record.data.certifications,
+            interests: record.data.interests,
+          },
+          currentProfileId: record.id,
+          currentProfileName: record.name,
+        }))
+      },
+
+      getProfileData: () => {
+        const { template: _, ...profileData } = get().cv
+        return profileData
+      },
+
+      saveProfileToSupabase: async (name?: string) => {
+        set({ isSavingProfile: true, saveError: null })
+
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+          set({ isSavingProfile: false, saveError: 'Not authenticated' })
+          return
+        }
+
+        const state = get()
+        const { template: _, ...profileFields } = state.cv
+        let profileData: ProfileData = { ...profileFields }
+
+        // Upload photo to Storage if it's still a base64 string
+        if (profileData.photo && profileData.photo.startsWith('data:')) {
+          try {
+            const base64 = profileData.photo.split(',')[1]
+            const mimeMatch = profileData.photo.match(/data:([^;]+);/)
+            const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg'
+            const ext = mime.split('/')[1] ?? 'jpg'
+
+            const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))
+            const blob = new Blob([bytes], { type: mime })
+
+            const fileId = state.currentProfileId ?? crypto.randomUUID()
+            const filePath = `${user.id}/profile-${fileId}.${ext}`
+
+            const { data: uploadData, error: uploadError } = await supabase.storage
+              .from('cv-photos')
+              .upload(filePath, blob, { upsert: true, contentType: mime })
+
+            if (!uploadError && uploadData) {
+              const { data: { publicUrl } } = supabase.storage
+                .from('cv-photos')
+                .getPublicUrl(filePath)
+              profileData = { ...profileData, photo: publicUrl }
+            }
+          } catch (err) {
+            console.error('Photo upload failed:', err)
+            set({ isSavingProfile: false, saveError: 'Photo upload failed' })
+            return
+          }
+        }
+
+        const profileName = name ?? state.currentProfileName ?? 'Profil'
+
+        let error: { message: string } | null = null
+
+        if (state.currentProfileId) {
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ data: profileData, name: profileName })
+            .eq('id', state.currentProfileId)
+            .eq('user_id', user.id)
+
+          error = updateError
+        } else {
+          const { data: inserted, error: insertError } = await supabase
+            .from('profiles')
+            .insert({ user_id: user.id, name: profileName, data: profileData })
+            .select('id')
+            .single()
+
+          error = insertError
+          if (!insertError && inserted) {
+            set({ currentProfileId: inserted.id, currentProfileName: profileName })
+          }
+        }
+
+        if (error) {
+          set({ isSavingProfile: false, saveError: error.message })
+        } else {
+          if (profileData.photo !== state.cv.photo) {
+            set((s) => ({ cv: { ...s.cv, photo: profileData.photo } }))
+          }
+          set({ isSavingProfile: false, lastProfileSavedAt: new Date() })
+        }
       },
 
       saveCVToSupabase: async (name?: string) => {
@@ -140,7 +274,7 @@ export const useCVStore = create<CVStore>()(
           // Update existing CV
           const { error: updateError } = await supabase
             .from('cvs')
-            .update({ data: cvData, name: cvName })
+            .update({ data: cvData, name: cvName, profile_id: state.currentProfileId })
             .eq('id', state.currentCvId)
             .eq('user_id', user.id)
 
@@ -149,7 +283,7 @@ export const useCVStore = create<CVStore>()(
           // Insert new CV
           const { data: inserted, error: insertError } = await supabase
             .from('cvs')
-            .insert({ user_id: user.id, name: cvName, data: cvData })
+            .insert({ user_id: user.id, name: cvName, data: cvData, profile_id: state.currentProfileId })
             .select('id')
             .single()
 
@@ -182,12 +316,18 @@ export const useCVStore = create<CVStore>()(
       partialize: (state) => ({
         cv: state.cv,
         step: state.step,
+        storeVersion: state.storeVersion,
         currentCvId: state.currentCvId,
         currentCvName: state.currentCvName,
+        currentProfileId: state.currentProfileId,
+        currentProfileName: state.currentProfileName,
       }),
       merge: (persisted, current) => {
         const persistedStore = persisted as Partial<CVStore>
         const persistedCV = (persistedStore.cv ?? {}) as Partial<CVData>
+
+        // Reset step if store version changed (e.g. TemplateStep removed)
+        const step = (persistedStore.storeVersion ?? 1) < STORE_VERSION ? 0 : (persistedStore.step ?? 0)
 
         // Migrate languages: add id if missing (old sessionStorage format)
         const languages = (persistedCV.languages ?? []).map((lang: CVData['languages'][number] & { id?: string }) =>
@@ -202,6 +342,8 @@ export const useCVStore = create<CVStore>()(
         return {
           ...current,
           ...persistedStore,
+          step,
+          storeVersion: STORE_VERSION,
           cv: {
             ...current.cv,
             ...persistedCV,

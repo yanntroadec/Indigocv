@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { redirect } from '@/i18n/navigation'
 import { createClient } from '@/lib/supabase/server'
 import CVList from '@/components/dashboard/CVList'
+import ProfileList from '@/components/dashboard/ProfileList'
 import { getLocale } from 'next-intl/server'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -18,19 +19,38 @@ export default async function DashboardPage() {
   if (!user) redirect({ href: '/login', locale })
   const userEmail = user!.email
 
-  const { data: rawCvs } = await supabase
-    .from('cvs')
-    .select('id, name, updated_at, data->personal')
-    .order('updated_at', { ascending: false })
-    .limit(50)
+  const [{ data: rawProfiles }, { data: rawCvs }] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('id, name, updated_at, data->personal')
+      .order('updated_at', { ascending: false })
+      .limit(50),
+    supabase
+      .from('cvs')
+      .select('id, name, updated_at, data->personal, profile_id, profiles(name)')
+      .order('updated_at', { ascending: false })
+      .limit(50),
+  ])
 
-  const cvs = (rawCvs ?? []).map((row) => {
+  const profiles = (rawProfiles ?? []).map((row) => {
     const r = row as Record<string, unknown>
     return {
       id: String(r.id ?? ''),
       name: String(r.name ?? ''),
       updated_at: String(r.updated_at ?? ''),
       personal: r.personal as { firstName?: string; lastName?: string; jobTitle?: string } | null ?? null,
+    }
+  })
+
+  const cvs = (rawCvs ?? []).map((row) => {
+    const r = row as Record<string, unknown>
+    const profileRow = r.profiles as { name?: string } | null
+    return {
+      id: String(r.id ?? ''),
+      name: String(r.name ?? ''),
+      updated_at: String(r.updated_at ?? ''),
+      personal: r.personal as { firstName?: string; lastName?: string; jobTitle?: string } | null ?? null,
+      profileName: profileRow?.name ?? null,
     }
   })
 
@@ -66,7 +86,16 @@ export default async function DashboardPage() {
           <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
           <p className="text-sm text-gray-500 mt-1">{userEmail}</p>
         </div>
-        <CVList initialCvs={cvs} />
+
+        <section className="mb-10">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">{t('profilesTitle')}</h2>
+          <ProfileList initialProfiles={profiles} />
+        </section>
+
+        <section>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">{t('cvsTitle')}</h2>
+          <CVList initialCvs={cvs} />
+        </section>
       </div>
     </main>
   )

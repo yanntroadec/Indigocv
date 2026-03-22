@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { useCVStore } from '@/store/cvStore'
-import TemplateStep from './steps/TemplateStep'
+import { useUser } from '@/components/AuthProvider'
 import PhotoStep from './steps/PhotoStep'
 import PersonalStep from './steps/PersonalStep'
 import ExperienceStep from './steps/ExperienceStep'
@@ -15,7 +15,6 @@ import CertificationsStep from './steps/CertificationsStep'
 import InterestsStep from './steps/InterestsStep'
 
 export const STEPS = [
-  { key: 'template' as const,       component: TemplateStep },
   { key: 'photo' as const,          component: PhotoStep },
   { key: 'personal' as const,       component: PersonalStep },
   { key: 'experience' as const,     component: ExperienceStep },
@@ -30,7 +29,8 @@ export const STEPS = [
 export default function FormWizard() {
   const t = useTranslations('form')
   const router = useRouter()
-  const { step, setStep } = useCVStore()
+  const { user } = useUser()
+  const { step, setStep, isSavingProfile, lastProfileSavedAt, saveError, saveProfileToSupabase } = useCVStore()
 
   const StepComponent = STEPS[step].component
   const isFirst = step === 0
@@ -47,6 +47,9 @@ export default function FormWizard() {
   const goPrev = () => {
     if (!isFirst) setStep(step - 1)
   }
+
+  const showSavedIndicator = lastProfileSavedAt && !saveError &&
+    (Date.now() - lastProfileSavedAt.getTime() < 3000)
 
   return (
     <div className="w-full max-w-xl mx-auto">
@@ -76,6 +79,22 @@ export default function FormWizard() {
           {isLast ? t('finish') : t('next')}
         </button>
       </div>
+
+      {user && (
+        <div className="mt-3 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => saveProfileToSupabase()}
+            disabled={isSavingProfile}
+            className="flex-1 rounded-xl border-2 border-indigo-200 bg-white/70 py-2.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition disabled:opacity-50"
+          >
+            {isSavingProfile ? t('savingProfile') : showSavedIndicator ? `✓ ${t('profileSaved')}` : t('saveProfile')}
+          </button>
+          {saveError && (
+            <p className="text-[10px] text-red-500">{saveError}</p>
+          )}
+        </div>
+      )}
     </div>
   )
 }

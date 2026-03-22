@@ -10,7 +10,6 @@ export default function PhotoStep() {
   const { cv, setPhoto } = useCVStore()
   const t = useTranslations('form.photo')
   const photo = cv.photo
-  const layout = cv.template.layout
   const inputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -41,20 +40,6 @@ export default function PhotoStep() {
     e.preventDefault()
     const file = e.dataTransfer.files?.[0]
     if (file) handleFile(file)
-  }
-
-  if (layout === 'single') {
-    return (
-      <div className="flex flex-col items-center gap-4 py-6 text-center">
-        <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center text-2xl">
-          ⚠️
-        </div>
-        <div>
-          <p className="font-semibold text-gray-700">{t('atsWarning')}</p>
-          <p className="text-sm text-gray-400 mt-1 max-w-sm">{t('atsDescription')}</p>
-        </div>
-      </div>
-    )
   }
 
   return (

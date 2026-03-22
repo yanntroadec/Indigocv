@@ -138,22 +138,6 @@ function UserMenu() {
               {t('home')}
             </Link>
           )}
-          <button
-            type="button"
-            onClick={() => { setOpen(false); useCVStore.getState().reset(); router.push('/create') }}
-            className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
-          >
-            {t('newCV')}
-          </button>
-          {pathname !== '/' && (
-            <button
-              type="button"
-              onClick={() => { setOpen(false); useCVStore.getState().saveCVToSupabase() }}
-              className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
-            >
-              {t('save')}
-            </button>
-          )}
           <div className="border-t border-gray-100" />
           <Link
             href="/dashboard"
@@ -172,27 +156,6 @@ function UserMenu() {
         </div>
       )}
     </div>
-  )
-}
-
-function NewCVButton() {
-  const t = useTranslations('header')
-  const reset = useCVStore((s) => s.reset)
-  const router = useRouter()
-
-  function handleNewCV() {
-    reset()
-    router.push('/create')
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={handleNewCV}
-      className="magenta-btn rounded-xl px-4 py-2 text-sm font-semibold transition"
-    >
-      {t('newCV')}
-    </button>
   )
 }
 
@@ -216,22 +179,17 @@ export default function Header() {
         {pathname === '/create' && <StepIndicator />}
       </div>
 
-      {/* Right — locale switcher + desktop actions + user menu */}
+      {/* Right — preview + locale switcher + user menu */}
       <div className="flex items-center gap-2">
+        {pathname === '/create' && (
+          <Link
+            href="/preview"
+            className="hidden sm:block indigo-btn rounded-xl px-4 py-2 text-sm font-semibold transition"
+          >
+            {t('preview')}
+          </Link>
+        )}
         <LocaleSwitcher />
-        <div className="hidden sm:flex items-center gap-3">
-          {pathname === '/create' && (
-            <>
-              <NewCVButton />
-              <Link
-                href="/preview"
-                className="indigo-btn rounded-xl px-4 py-2 text-sm font-semibold transition"
-              >
-                {t('preview')}
-              </Link>
-            </>
-          )}
-        </div>
         <UserMenu />
       </div>
     </header>

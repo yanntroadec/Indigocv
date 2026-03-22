@@ -33,20 +33,31 @@
     "backHome": "← Retour à l'accueil"
   },
   "dashboard": {
-    "title": "Mes CVs",
+    "title": "Mon dashboard",
+    "profilesTitle": "Mes profils",
+    "cvsTitle": "Mes CVs",
     "newCV": "Créer un nouveau CV",
+    "newProfile": "Créer un nouveau profil",
     "empty": "Vous n'avez pas encore de CV sauvegardé.",
+    "emptyProfiles": "Vous n'avez pas encore de profil sauvegardé.",
     "openCV": "Ouvrir",
+    "editProfile": "Modifier",
+    "useForCV": "Utiliser pour un CV",
     "rename": "Renommer",
     "delete": "Supprimer",
     "confirmDelete": "Confirmer",
     "cancelDelete": "Annuler",
-    "modifiedOn": "Modifié le {date}"
+    "modifiedOn": "Modifié le {date}",
+    "linkedTo": "Profil : {name}",
+    "noProfile": "Aucun profil lié"
   },
   "form": {
     "prev": "← Précédent",
     "next": "Suivant →",
     "finish": "Aperçu de mon CV →",
+    "saveProfile": "Sauvegarder les infos",
+    "savingProfile": "Sauvegarde…",
+    "profileSaved": "Sauvegardé !",
     "steps": {
       "template": { "label": "Modèle", "short": "Modèle" },
       "photo": { "label": "Photo de profil", "short": "Photo" },
@@ -239,12 +250,14 @@
     "present": "Présent"
   },
   "preview": {
-    "backToEdit": "← Modifier mon CV",
+    "backToEdit": "← Modifier mon profil",
     "download": "Télécharger le PDF",
     "save": "Sauvegarder",
     "saving": "Sauvegarde…",
     "saved": "Sauvegardé",
     "newCV": "Nouveau CV",
-    "yourCV": "Votre CV"
+    "yourCV": "Votre CV",
+    "selectProfile": "Profil",
+    "customProfile": "Personnalisé (données actuelles)"
   }
 }
