@@ -17,7 +17,9 @@
     "preview": "Vista previa →"
   },
   "footer": {
-    "copyright": "© {year} IndigoCV"
+    "copyright": "© {year} IndigoCV",
+    "faq": "FAQ",
+    "contact": "Contacto"
   },
   "login": {
     "title": "Iniciar sesión",
@@ -268,5 +270,58 @@
     "yourCV": "Tu CV",
     "selectProfile": "Perfil",
     "customProfile": "Personalizado (datos actuales)"
+  },
+  "faq": {
+    "title": "Preguntas frecuentes",
+    "subtitle": "Todo lo que necesitas saber sobre IndigoCV.",
+    "backHome": "← Volver al inicio",
+    "q1": {
+      "question": "¿Qué es IndigoCV?",
+      "answer": "IndigoCV es una herramienta gratuita en línea para crear CVs profesionales. Rellena un formulario sencillo en varios pasos, personaliza el diseño en tiempo real y descarga tu CV en PDF — todo en pocos minutos."
+    },
+    "q2": {
+      "question": "¿Cómo funciona el generador de PDF?",
+      "answer": "Una vez que hayas introducido tu información, accedes a una vista previa en tiempo real de tu CV. Puedes personalizar el diseño (una o dos columnas), los colores, la fuente y la densidad del contenido. El PDF se genera directamente en tu navegador — sin necesidad de procesamiento en servidor. Cuando estés satisfecho con el resultado, descárgalo con un clic."
+    },
+    "q3": {
+      "question": "¿Qué diseños y opciones de personalización hay disponibles?",
+      "answer": "IndigoCV ofrece dos diseños: una columna única optimizada para ATS (sistemas de seguimiento de candidatos) y un diseño moderno de dos columnas. Puedes elegir entre varias paletas de colores, 8 fuentes profesionales y 3 niveles de densidad (compacto, normal, espaciado). También puedes activar o desactivar cada sección individualmente."
+    },
+    "q4": {
+      "question": "¿Es complicado rellenar el formulario?",
+      "answer": "¡Para nada! El formulario se divide en 9 pasos guiados: foto, datos personales, experiencia laboral, proyectos, formación, certificaciones, competencias, idiomas e intereses. Cada sección es opcional excepto los datos personales básicos — rellena solo lo que sea relevante para ti."
+    },
+    "q5": {
+      "question": "¿Necesito una cuenta?",
+      "answer": "No. Puedes crear y descargar un CV sin registrarte. Sin embargo, crear una cuenta gratuita te permite guardar tu trabajo en tu panel personal para volver a editarlo más tarde."
+    },
+    "q6": {
+      "question": "¿Cómo funciona el panel de control?",
+      "answer": "El panel te permite gestionar dos cosas: perfiles y CVs. Los perfiles son conjuntos reutilizables de información personal — crea uno y úsalo para rellenar rápidamente varios CVs. Cada CV es un documento independiente con su propio diseño y contenido, lo que te permite adaptar diferentes versiones para diferentes candidaturas."
+    },
+    "q7": {
+      "question": "¿Mi CV es compatible con ATS?",
+      "answer": "Sí. El diseño de una columna está específicamente diseñado para la compatibilidad con ATS. Utiliza texto limpio y estructurado que los sistemas de seguimiento de candidatos pueden analizar de forma fiable. Para máxima compatibilidad, recomendamos usar este diseño sin foto."
+    },
+    "q8": {
+      "question": "¿Están mis datos seguros?",
+      "answer": "Los datos de tu CV permanecen en la sesión de tu navegador hasta que elijas guardarlos. Si creas una cuenta, tus datos se almacenan de forma segura en nuestra base de datos. Nunca compartimos ni vendemos tu información personal."
+    }
+  },
+  "contact": {
+    "title": "Contáctanos",
+    "subtitle": "¿Una pregunta, una sugerencia o un error que reportar? Envíanos un mensaje.",
+    "nameLabel": "Tu nombre",
+    "namePlaceholder": "Nombre y apellidos",
+    "emailLabel": "Tu correo electrónico",
+    "emailPlaceholder": "tu@ejemplo.com",
+    "messageLabel": "Tu mensaje",
+    "messagePlaceholder": "Escribe tu mensaje aquí...",
+    "submit": "Enviar mensaje",
+    "submitting": "Enviando…",
+    "successTitle": "¡Mensaje enviado!",
+    "successMessage": "Gracias por contactarnos. Te responderemos lo antes posible.",
+    "errorMessage": "Ha ocurrido un error. Por favor, inténtalo de nuevo más tarde.",
+    "backHome": "← Volver al inicio"
   }
 }

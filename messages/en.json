@@ -17,7 +17,9 @@
     "preview": "Preview →"
   },
   "footer": {
-    "copyright": "© {year} IndigoCV"
+    "copyright": "© {year} IndigoCV",
+    "faq": "FAQ",
+    "contact": "Contact"
   },
   "login": {
     "title": "Sign in",
@@ -268,5 +270,58 @@
     "yourCV": "Your CV",
     "selectProfile": "Profile",
     "customProfile": "Custom (current data)"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Everything you need to know about IndigoCV.",
+    "backHome": "← Back to home",
+    "q1": {
+      "question": "What is IndigoCV?",
+      "answer": "IndigoCV is a free online tool for creating professional CVs. Fill in a simple multi-step form, customize the design in real time, and download your CV as a PDF — all in just a few minutes."
+    },
+    "q2": {
+      "question": "How does the PDF generator work?",
+      "answer": "Once you've filled in your information, you access a live preview of your CV. You can customize the layout (single or two-column), colors, font, and content density. The PDF is generated directly in your browser — no server processing needed. When you're happy with the result, download it in one click."
+    },
+    "q3": {
+      "question": "What layouts and customization options are available?",
+      "answer": "IndigoCV offers two layouts: a single-column layout optimized for ATS (applicant tracking systems) and a modern two-column layout. You can choose from several color palettes, 8 professional fonts, and 3 density levels (compact, normal, airy). You can also toggle individual sections on or off."
+    },
+    "q4": {
+      "question": "Is the form complicated to fill in?",
+      "answer": "Not at all! The form is divided into 9 guided steps: photo, personal info, work experience, projects, education, certifications, skills, languages, and interests. Every section is optional except basic personal information — fill in only what's relevant to you."
+    },
+    "q5": {
+      "question": "Do I need an account?",
+      "answer": "No. You can create and download a CV without signing up. However, creating a free account lets you save your work in your personal dashboard so you can come back and edit it later."
+    },
+    "q6": {
+      "question": "How does the dashboard work?",
+      "answer": "The dashboard lets you manage two things: profiles and CVs. Profiles are reusable sets of personal information — create one and use it to quickly fill multiple CVs. Each CV is an independent snapshot with its own layout and content, so you can tailor different versions for different job applications."
+    },
+    "q7": {
+      "question": "Is my CV compatible with ATS?",
+      "answer": "Yes. The single-column layout is specifically designed for ATS compatibility. It uses clean, structured text that applicant tracking systems can parse reliably. For maximum compatibility, we recommend using this layout without a photo."
+    },
+    "q8": {
+      "question": "Is my data safe?",
+      "answer": "Your CV data stays in your browser session until you choose to save it. If you create an account, your data is stored securely in our database. We never share or sell your personal information."
+    }
+  },
+  "contact": {
+    "title": "Contact us",
+    "subtitle": "A question, a suggestion, or a bug to report? Send us a message.",
+    "nameLabel": "Your name",
+    "namePlaceholder": "First and last name",
+    "emailLabel": "Your email",
+    "emailPlaceholder": "you@example.com",
+    "messageLabel": "Your message",
+    "messagePlaceholder": "Write your message here...",
+    "submit": "Send message",
+    "submitting": "Sending…",
+    "successTitle": "Message sent!",
+    "successMessage": "Thank you for reaching out. We'll get back to you as soon as possible.",
+    "errorMessage": "An error occurred. Please try again later.",
+    "backHome": "← Back to home"
   }
 }

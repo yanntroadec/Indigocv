@@ -1,6 +1,6 @@
 'use client'
 
-import { usePathname } from '@/i18n/navigation'
+import { usePathname, Link } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 
 export default function Footer() {
@@ -19,7 +19,16 @@ export default function Footer() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      gap: '6px',
     }}>
+      <Link href="/faq" className="hover:text-indigo-600 transition" style={{ fontSize: '11px', color: '#9ca3af' }}>
+        {t('faq')}
+      </Link>
+      <span style={{ fontSize: '11px', color: '#d1d5db' }}>·</span>
+      <Link href="/contact" className="hover:text-indigo-600 transition" style={{ fontSize: '11px', color: '#9ca3af' }}>
+        {t('contact')}
+      </Link>
+      <span style={{ fontSize: '11px', color: '#d1d5db' }}>·</span>
       <p style={{ fontSize: '11px', color: '#9ca3af' }}>
         {t('copyright', { year: new Date().getFullYear() })}
       </p>
