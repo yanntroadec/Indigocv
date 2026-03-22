@@ -4,10 +4,6 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://indigocv.vercel.ap
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: {
-    default: 'IndigoCV',
-    template: '%s — IndigoCV',
-  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: '32x32' },
