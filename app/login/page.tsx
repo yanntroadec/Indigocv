@@ -20,6 +20,7 @@ export default function LoginPage() {
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
+        // window.location.origin ensures PKCE code_verifier matches the correct domain
       },
     })
 
