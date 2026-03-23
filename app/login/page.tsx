@@ -26,7 +26,13 @@ export default function LoginPage() {
     setLoading(false)
 
     if (error) {
-      setError(error.message)
+      if (error.message.includes('security purposes') || error.message.includes('rate limit')) {
+        setError('Trop de demandes. Veuillez patienter un instant avant de réessayer.')
+      } else if (error.message.includes('email')) {
+        setError('Veuillez entrer une adresse email valide.')
+      } else {
+        setError('Une erreur est survenue. Veuillez réessayer.')
+      }
     } else {
       setSubmitted(true)
     }

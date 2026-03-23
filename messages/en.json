@@ -32,7 +32,10 @@
     "successTitle": "Check your inbox!",
     "successMessage": "A sign-in link has been sent to {email}. Click it to access your space.",
     "changeEmail": "Use a different address",
-    "backHome": "← Back to home"
+    "backHome": "← Back to home",
+    "errorRateLimit": "Too many requests. Please wait a moment before trying again.",
+    "errorInvalidEmail": "Please enter a valid email address.",
+    "errorGeneric": "Something went wrong. Please try again."
   },
   "dashboard": {
     "title": "My dashboard",

@@ -32,7 +32,10 @@
     "successTitle": "¡Revisa tu bandeja de entrada!",
     "successMessage": "Se ha enviado un enlace de acceso a {email}. Haz clic en él para acceder a tu espacio.",
     "changeEmail": "Usar otra dirección",
-    "backHome": "← Volver al inicio"
+    "backHome": "← Volver al inicio",
+    "errorRateLimit": "Demasiadas solicitudes. Por favor, espera un momento antes de intentarlo de nuevo.",
+    "errorInvalidEmail": "Por favor, introduce una dirección de correo válida.",
+    "errorGeneric": "Algo salió mal. Por favor, inténtalo de nuevo."
   },
   "dashboard": {
     "title": "Mi panel",

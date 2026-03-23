@@ -31,7 +31,13 @@ export default function LoginPage() {
     setLoading(false)
 
     if (error) {
-      setError(error.message)
+      if (error.message.includes('security purposes') || error.message.includes('rate limit')) {
+        setError(t('errorRateLimit'))
+      } else if (error.message.includes('email')) {
+        setError(t('errorInvalidEmail'))
+      } else {
+        setError(t('errorGeneric'))
+      }
     } else {
       setSubmitted(true)
     }

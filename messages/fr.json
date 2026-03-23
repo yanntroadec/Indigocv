@@ -32,7 +32,10 @@
     "successTitle": "Vérifiez votre boîte mail !",
     "successMessage": "Un lien de connexion a été envoyé à {email}. Cliquez dessus pour accéder à votre espace.",
     "changeEmail": "Utiliser une autre adresse",
-    "backHome": "← Retour à l'accueil"
+    "backHome": "← Retour à l'accueil",
+    "errorRateLimit": "Trop de demandes. Veuillez patienter un instant avant de réessayer.",
+    "errorInvalidEmail": "Veuillez entrer une adresse email valide.",
+    "errorGeneric": "Une erreur est survenue. Veuillez réessayer."
   },
   "dashboard": {
     "title": "Mon dashboard",
