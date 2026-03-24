@@ -95,7 +95,7 @@ export async function POST(request: Request) {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY)
       const { error: emailError } = await resend.emails.send({
-        from: 'IndigoCV <onboarding@resend.dev>',
+        from: 'IndigoCV <noreply@indigocv.com>',
         to: process.env.CONTACT_EMAIL,
         subject: `[IndigoCV] Message de ${safeName}`,
         replyTo: safeEmail,
